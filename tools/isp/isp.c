@@ -641,7 +641,7 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 				// set partition fisrt for ubifs. ubi write data base on the partition info.
 #if !defined(PARTITION_SIZE_BAD_BLOCK_DOES_NOT_COUNT)
 				if (strcmp(isp_info.file_header.partition_info[i].file_name, "rootfs") == 0) {
-					fprintf(fd, "setenv isp_mtdpart_size -\n"); //set rootfs part size to remaining space
+					fprintf(fd, "setenv isp_mtdpart_size 0x20c0000\n"); //set rootfs part size to remaining space
 				} else {
 					fprintf(fd, "setenv isp_mtdpart_size 0x%lx\n", isp_info.file_header.partition_info[i].partition_size);
 				}
@@ -933,7 +933,7 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 
 	fprintf(fd, "echo Following environment variables will be saved:\n");
 	fprintf(fd, "printenv\n");
-	fprintf(fd, "env save\n");
+	//fprintf(fd, "env save\n");
 	if (nand_or_emmc == IDX_EMMC) {
 		fprintf(fd, "env save\n"); /* eMMC: save to env_redund */
 	}
