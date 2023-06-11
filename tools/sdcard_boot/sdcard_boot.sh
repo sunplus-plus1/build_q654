@@ -34,7 +34,7 @@ RC_SDCARDBOOTFILE=rc.sdcardboot
 FIP_IMG=fip.img
 
 # Size of FAT32 partition size (unit: M)
-FAT_IMG_SIZE_M=256
+FAT_IMG_SIZE_M=24
 
 # Block size is 512 bytes for sfdisk and FAT32 sector is 1024 bytes
 BLOCK_SIZE=512
