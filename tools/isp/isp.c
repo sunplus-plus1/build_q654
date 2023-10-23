@@ -2146,7 +2146,10 @@ int gen_nor_isp_script(const char *file_name_isp_script)
 		size_file     -= size;
 		size_verified += size;
 	}
-
+	//reset spi nor controller for 32M and 64M flash
+	fprintf(fd, "mw 0xf8800018 0x00020002 0x1\n");
+	fprintf(fd, "mw 0xf8800018 0x00020000 0x1\n");
+	
 	fprintf(fd, "echo \"**************************************************\"\n");
 	fprintf(fd, "echo \"              ISP all: Done                       \"\n");
 	fprintf(fd, "echo \"**************************************************\"\n");
