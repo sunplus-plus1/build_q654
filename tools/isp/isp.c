@@ -126,7 +126,7 @@
 #else
 #define FILE_SIZE_IMAGE_XBOOT0                      (64 << 10)
 #endif
-#define FILE_SIZE_IMAGE_UBOOT0                      ((1 << 20) - FILE_SIZE_IMAGE_XBOOT0)
+#define FILE_SIZE_IMAGE_UBOOT0                      ((1536 << 10) - FILE_SIZE_IMAGE_XBOOT0) //add 512k uboot size for nand
 
 #define NAND_READ_BY_PARTITION_NAME                         // if not defined, it's by NAND address
 // #define PARTITION_SIZE_BAD_BLOCK_DOES_NOT_COUNT
