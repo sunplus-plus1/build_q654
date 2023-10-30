@@ -333,74 +333,64 @@ list_config()
 			echo "Error: Unknown config!"
 			exit 1
 		esac
-	elif [ "$board" = "2" ]; then
-		zmem=1
-		runzebu=1
-		bootdev=nor
-		echo "ZMEM=1" >> $BUILD_CONFIG
-	else
-		echo "Error: Unknown config!"
-		exit 1
-	fi
 
-	if [ "$bootdev" = "nor" -o "$bootdev" = "spi_nor" ]; then
-		$ECHO $COLOR_GREEN"Select SPI-NOR size:"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[1] 16 MiB"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[2] 32 MiB"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[3] 64 MiB"$COLOR_ORIGIN
-		read sel
-		case "$sel" in
-		"1")
-			echo "FLASH_SIZE=16" >> $BUILD_CONFIG
-			;;
-		"2")
-			echo "FLASH_SIZE=32" >> $BUILD_CONFIG
-			;;
-		"3")
-			echo "FLASH_SIZE=64" >> $BUILD_CONFIG
-			;;
-		*)
-			echo "Error: Unknown config!"
-			exit 1
-		esac
-	fi
+		if [ "$bootdev" = "nor" -o "$bootdev" = "spi_nor" ]; then
+			$ECHO $COLOR_GREEN"Select SPI-NOR size:"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[1] 16 MiB"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[2] 32 MiB"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[3] 64 MiB"$COLOR_ORIGIN
+			read sel
+			case "$sel" in
+			"1")
+				echo "FLASH_SIZE=16" >> $BUILD_CONFIG
+				;;
+			"2")
+				echo "FLASH_SIZE=32" >> $BUILD_CONFIG
+				;;
+			"3")
+				echo "FLASH_SIZE=64" >> $BUILD_CONFIG
+				;;
+			*)
+				echo "Error: Unknown config!"
+				exit 1
+			esac
+		fi
 
-	if [ "$bootdev" = "emmc" ]; then
-		$ECHO $COLOR_GREEN"Select eMMC size:"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[1] 1 GiB"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[2] 2 GiB"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[3] 4 GiB"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[4] 8 GiB"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[5] 16 GiB"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[6] 32 GiB"$COLOR_ORIGIN
-		read sel
-		case "$sel" in
-		"1")
-			echo "FLASH_SIZE=1024" >> $BUILD_CONFIG
-			;;
-		"2")
-			echo "FLASH_SIZE=2048" >> $BUILD_CONFIG
-			;;
-		"3")
-			echo "FLASH_SIZE=4096" >> $BUILD_CONFIG
-			;;
-		"4")
-			echo "FLASH_SIZE=8192" >> $BUILD_CONFIG
-			;;
-		"5")
-			echo "FLASH_SIZE=16384" >> $BUILD_CONFIG
-			;;
-		"6")
-			echo "FLASH_SIZE=32768" >> $BUILD_CONFIG
-			;;
-		*)
-			echo "Error: Unknown config!"
-			exit 1
-		esac
-	fi
+		if [ "$bootdev" = "emmc" ]; then
+			$ECHO $COLOR_GREEN"Select eMMC size:"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[1] 1 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[2] 2 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[3] 4 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[4] 8 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[5] 16 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[6] 32 GiB"$COLOR_ORIGIN
+			read sel
+			case "$sel" in
+			"1")
+				echo "FLASH_SIZE=1024" >> $BUILD_CONFIG
+				;;
+			"2")
+				echo "FLASH_SIZE=2048" >> $BUILD_CONFIG
+				;;
+			"3")
+				echo "FLASH_SIZE=4096" >> $BUILD_CONFIG
+				;;
+			"4")
+				echo "FLASH_SIZE=8192" >> $BUILD_CONFIG
+				;;
+			"5")
+				echo "FLASH_SIZE=16384" >> $BUILD_CONFIG
+				;;
+			"6")
+				echo "FLASH_SIZE=32768" >> $BUILD_CONFIG
+				;;
+			*)
+				echo "Error: Unknown config!"
+				exit 1
+			esac
+		fi
 
-	echo "PNAND_FLASH=0" >> $BUILD_CONFIG
-	if [ "$board" = "1" ]; then
+		echo "PNAND_FLASH=0" >> $BUILD_CONFIG
 		if [ "$bootdev" = "spi_nand" ]; then
 			$ECHO $COLOR_GREEN"Select NAND size:"$COLOR_ORIGIN
 			$ECHO $COLOR_YELLOW"[1] 128 MiB"$COLOR_ORIGIN
@@ -539,31 +529,39 @@ list_config()
 				exit 1
 			esac
 		fi
-	fi
 
-	if [ "$bootdev" = "emmc" -o "$bootdev" = "usb" -o "$bootdev" = "sdcard"  ]; then
-		$ECHO $COLOR_GREEN"Select rootfs:"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[1] BusyBox"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[2] Full"$COLOR_ORIGIN
-		read sel
-		case "$sel" in
-		"2")
-			rootfs_content=FULL
-			;;
-		*)
-			sel=1
-		esac
+		if [ "$bootdev" = "emmc" -o "$bootdev" = "usb" -o "$bootdev" = "sdcard"  ]; then
+			$ECHO $COLOR_GREEN"Select rootfs:"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[1] BusyBox"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[2] Full"$COLOR_ORIGIN
+			read sel
+			case "$sel" in
+			"2")
+				rootfs_content=FULL
+				;;
+			*)
+				sel=1
+			esac
+		fi
+	elif [ "$board" = "9" ]; then
+		zmem=1
+		runzebu=1
+		bootdev=nor
+		echo "ZMEM=1" >> $BUILD_CONFIG
+	else
+		echo "Error: Unknown config!"
+		exit 1
 	fi
 }
 
 $ECHO $COLOR_GREEN"Select boards:"$COLOR_ORIGIN
 $ECHO $COLOR_YELLOW"[1] SP7350 Ev Board"$COLOR_ORIGIN
-$ECHO $COLOR_YELLOW"[2] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
+#$ECHO $COLOR_YELLOW"[9] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
 read board
 
 echo "CHIP=Q628" > $BUILD_CONFIG
 
-if [ "$board" = "1" -o "$board" = "2" ]; then
+if [ "$board" = "1" -o "$board" = "9" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-ev" >> $BUILD_CONFIG
@@ -601,7 +599,7 @@ list_config
 
 set_config_directly=0
 
-if [ "$board" = "1" -o "$board" = "2" ]; then
+if [ "$board" = "1" -o "$board" = "9" ]; then
 	## board = SP7350
 	$ECHO $COLOR_GREEN"Select secure modes:"$COLOR_ORIGIN
 	$ECHO $COLOR_YELLOW"[1] No secure (default)"$COLOR_ORIGIN
@@ -618,7 +616,7 @@ if [ "$board" = "1" -o "$board" = "2" ]; then
 
 	sel_chip=$(chip_lookup $chip)
 	sel_board=ev
-	if [ "$board" = "2" ]; then
+	if [ "$board" = "9" ]; then
 		sel_board=zebu
 	fi
 	set_config_directly=1
