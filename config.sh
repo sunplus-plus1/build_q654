@@ -232,6 +232,20 @@ c_chip_tftp_config()
 	set_bootfrom_config TFTP
 
 	USER_NAME=$(whoami)
+	
+	## The code below is just for CD teams.
+	##=================================================================
+	if [ "${BOARD_MAC_ADDR}" = "" ]; then
+		if [ -f /usr/local/bin/username2mac ]; then
+			BOARD_MAC_ADDR=$(/usr/local/bin/username2mac ${USER_NAME})
+			if [ "${BOARD_MAC_ADDR}" != "" ]; then
+				echo "Your BOARD_MAC_ADDR is ${BOARD_MAC_ADDR}"
+			fi
+			TFTP_SERVER_IP=172.28.52.201
+			echo "Your TFTP server IP address is ${TFTP_SERVER_IP}"
+		fi
+	fi
+	##=================================================================
 	echo "Your USER_NAME is ${USER_NAME}"
 	echo "BOOT_KERNEL_FROM_TFTP="${BOOT_KERNEL_FROM_TFTP} >> ${BUILD_CONFIG}
 	echo "USER_NAME=_"${USER_NAME} >> ${BUILD_CONFIG}
