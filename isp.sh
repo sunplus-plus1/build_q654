@@ -19,11 +19,7 @@ cp $U uboot1
 cp $U uboot2
 cp $K kernel
 
-if [ "$2" = "Q645" -o "$2" = "SP7350" ]; then
-	cp $F fip
-else
-	touch reserve
-fi
+cp $F fip
 
 if [ "$1" != "SDCARD" ]; then
 	cp $ROOTFS rootfs
@@ -70,31 +66,18 @@ if [ "$1" = "EMMC" ]; then
 		EMMC_SIZE=0x100000000	# default size = 4GiB
 	fi
 	EMMC_SIZE=$(($EMMC_SIZE-0x2000000))
-	if [ "$2" = "Q645" -o "$2" = "SP7350" ]; then
-		isp pack_image ISPBOOOT.BIN \
-			xboot0 uboot0 \
-			xboot1 0x100000 \
-			uboot1 0x100000 \
-			uboot2 0x100000 \
-			fip 0x100000 \
-			env 0x80000 \
-			env_redund 0x80000 \
-			dtb 0x40000 \
-			kernel 0x2000000 \
-			rootfs $EMMC_SIZE
-	else
-		isp pack_image ISPBOOOT.BIN \
-			xboot0 uboot0 \
-			xboot1 0x100000 \
-			uboot1 0x100000 \
-			uboot2 0x100000 \
-			env 0x80000 \
-			env_redund 0x80000 \
-			reserve 0x100000 \
-			dtb 0x40000 \
-			kernel 0x2000000 \
-			rootfs $EMMC_SIZE
-	fi
+	isp pack_image ISPBOOOT.BIN \
+		xboot0 uboot0 \
+		xboot1 0x100000 \
+		uboot1 0x100000 \
+		uboot2 0x100000 \
+		fip 0x100000 \
+		env 0x80000 \
+		env_redund 0x80000 \
+		dtb 0x40000 \
+		kernel 0x2000000 \
+		rootfs $EMMC_SIZE
+
 elif [ "$1" = "NAND" ]; then
 	if [ -n "$3" ]; then
 		NAND_SIZE=$(($3*0x100000))
@@ -102,33 +85,18 @@ elif [ "$1" = "NAND" ]; then
 		NAND_SIZE=0x10000000	# default size = 256 MiB
 	fi
 
-	if [ "$2" = "Q645" -o "$2" = "SP7350" ]; then
-		NAND_SIZE=$(($NAND_SIZE-0x2100000))
-		isp pack_image ISPBOOOT.BIN \
-			xboot0 uboot0 \
-			xboot1 0x100000 \
-			uboot1 0x100000 \
-			uboot2 0x100000 \
-			fip 0x200000 \
-			env 0x80000 \
-			env_redund 0x80000 \
-			dtb 0x40000 \
-			kernel 0x1900000 \
-			rootfs $NAND_SIZE
-	else
-		NAND_SIZE=$(($NAND_SIZE-0x2000000))
-		isp pack_image ISPBOOOT.BIN \
-			xboot0 uboot0 \
-			xboot1 0x100000 \
-			uboot1 0x100000 \
-			uboot2 0x100000 \
-			env 0x80000 \
-			env_redund 0x80000 \
-			reserve 0x100000 \
-			dtb 0x40000 \
-			kernel 0x1900000 \
-			rootfs $NAND_SIZE
-	fi
+	NAND_SIZE=$(($NAND_SIZE-0x2100000))
+	isp pack_image ISPBOOOT.BIN \
+		xboot0 uboot0 \
+		xboot1 0x100000 \
+		uboot1 0x100000 \
+		uboot2 0x100000 \
+		fip 0x200000 \
+		env 0x80000 \
+		env_redund 0x80000 \
+		dtb 0x40000 \
+		kernel 0x1900000 \
+		rootfs $NAND_SIZE
 
 elif [ "$1" = "PNAND" ]; then
 	isp pack_image ISPBOOOT.BIN \
@@ -144,23 +112,13 @@ elif [ "$1" = "PNAND" ]; then
 		${partition[8]} ${size[8]}
 
 elif [ "$1" = "USB" ]; then
-	if [ "$2" = "Q645" -o "$2" = "SP7350" ]; then
-		isp pack_image ISPBOOOT.BIN \
-			xboot0 uboot0 \
-			xboot1 0x100000 \
-			uboot1 0x100000 \
-			fip 0x100000 \
-			dtb 0x40000 \
-			kernel 0xd80000
-	else
-		isp pack_image ISPBOOOT.BIN \
-			xboot0 uboot0 \
-			xboot1 0x100000 \
-			uboot1 0x100000 \
-			reserve 0x100000 \
-			dtb 0x40000 \
-			kernel 0xd80000
-	fi
+	isp pack_image ISPBOOOT.BIN \
+		xboot0 uboot0 \
+		xboot1 0x100000 \
+		uboot1 0x100000 \
+		fip 0x100000 \
+		dtb 0x40000 \
+		kernel 0xd80000
 fi
 
 rm -rf xboot0
@@ -179,14 +137,9 @@ rm -rf fip
 # Create image for booting from SD card or USB storage.
 if [ "$1" = "SDCARD" ]; then
 	mkdir -p boot2linux_SDcard
-	if [ "$2" = "Q645" -o "$2" = "SP7350" ]; then
-		cp -rf $U $K $N $F ./boot2linux_SDcard
-		dd if=$X of=boot2linux_SDcard/ISPBOOOT.BIN
-	else
-		cp -rf $U $K $N ./boot2linux_SDcard
-		dd if=/dev/zero of=boot2linux_SDcard/ISPBOOOT.BIN bs=1024 count=64
-		dd if=$X of=boot2linux_SDcard/ISPBOOOT.BIN conv=notrunc
-	fi
+	cp -rf $U $K $N $F ./boot2linux_SDcard
+	dd if=$X of=boot2linux_SDcard/ISPBOOOT.BIN
+
 fi
 if [ "$1" = "USB" ]; then
 	mkdir -p boot2linux_usb

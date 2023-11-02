@@ -22,13 +22,9 @@ else
 	NOR_SIZE=0x1000000	# default size = 16 MiB
 fi
 
-if [ "$1" = "Q645" -o "$1" = "SP7350" ]; then
-	cp $F fip
-	isp pack_image4nor_isp ISPBOOOT.BIN xboot uboot spi_all $NOR_SIZE fip 0x100000
-	rm -f fip
-elif [ "$1" = "Q628" ]; then
-	isp pack_image4nor_isp ISPBOOOT.BIN xboot uboot spi_all $NOR_SIZE
-fi
+cp $F fip
+isp pack_image4nor_isp ISPBOOOT.BIN xboot uboot spi_all $NOR_SIZE fip 0x100000
+rm -f fip
 
 rm -f xboot
 rm -f uboot

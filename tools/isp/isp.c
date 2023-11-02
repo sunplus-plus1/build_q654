@@ -61,9 +61,7 @@
 #define MESSAGE_OUT  " 1> /dev/null 2>&1 "
 #endif
 
-#if ((defined(Q645) && (Q645 == 1)) || (defined(SP7350) && (SP7350 == 1)))
 #define FIP     // For FIP partition, it includes BL31 and OPTEE images
-#endif
 
 #define SUPPORT_MAIN_STORAGE_IS_EMMC
 #define XBOOT1_IN_EMMC_BOOTPART
@@ -119,13 +117,7 @@
 
 
 
-#if defined(Q645) && (Q645 == 1)
 #define FILE_SIZE_IMAGE_XBOOT0                      (192 << 10)
-#elif defined(SP7350) && (SP7350 == 1)
-#define FILE_SIZE_IMAGE_XBOOT0                      (192 << 10)
-#else
-#define FILE_SIZE_IMAGE_XBOOT0                      (64 << 10)
-#endif
 #define FILE_SIZE_IMAGE_UBOOT0                      ((1536 << 10) - FILE_SIZE_IMAGE_XBOOT0) //add 512k uboot size for nand
 
 #define NAND_READ_BY_PARTITION_NAME                         // if not defined, it's by NAND address

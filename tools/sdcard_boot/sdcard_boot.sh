@@ -60,15 +60,7 @@ if [ ! -d $ROOT_DIR_IN ]; then
 fi
 
 # cp uEnv.txt to out/sdcardboot
-if [ $1 -eq "1" ]; then
-	cp $EXT_ENV_RISCV $OUTPATH/$EXT_ENV
-elif [ $1 -eq "2" ]; then
-	cp $EXT_ENV_A64_Q645 $OUTPATH/$EXT_ENV
-elif [ $1 -eq "3" ]; then
-	cp $EXT_ENV_A64_SP7350 $OUTPATH/$EXT_ENV
-else
-	cp $EXT_ENV $OUTPATH
-fi
+cp $EXT_ENV_A64_SP7350 $OUTPATH/$EXT_ENV
 
 # Calculate parameter.
 partition_size_1=$(($FAT_IMG_SIZE_M*1024*1024))
