@@ -573,8 +573,6 @@ $ECHO $COLOR_YELLOW"[1] SP7350 Ev Board"$COLOR_ORIGIN
 #$ECHO $COLOR_YELLOW"[9] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
 read board
 
-echo "CHIP=Q628" > $BUILD_CONFIG
-
 if [ "$board" = "1" -o "$board" = "9" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG

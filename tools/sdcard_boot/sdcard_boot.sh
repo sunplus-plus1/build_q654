@@ -3,11 +3,11 @@
 TOP=../../..
 
 # Generate a disk image containing FAT32 and EXT4 partitions.
-# ISPBOOOT.BIN, u-boot.img, uImage, a926.img, and uEnv.txt
+# ISPBOOOT.BIN, u-boot.img, uImage, fip.img, and uEnv.txt
 # are placed on the FAT32 partition, and uncompressed root
 # file-system is placed on the EXT4 partition.
 # 1. Create boot (FAT32) partition.
-# 2. Copy ISPBOOOT.BIN, u-boot.img, uImage, a926.img, and
+# 2. Copy ISPBOOOT.BIN, u-boot.img, uImage, fip.img, and
 #    uEnv.txt to it.
 # 3. Copy boot partition to output file 'ISP_SD_BOOOT.img'.
 # 4. Create root (ext4) partition.
@@ -25,10 +25,7 @@ ROOT_IMG=$OUTPATH/../rootfs.img
 OUT_FILE=$OUTPATH/ISP_SD_BOOOT.img
 FAT_IMG_OUT=fat.img
 EXT_ENV=uEnv.txt
-EXT_ENV_RISCV=uEnv_riscv.txt
-EXT_ENV_A64_Q645=uEnv_a64_q645.txt
-EXT_ENV_A64_SP7350=uEnv_a64_sp7350.txt
-NONOS_IMG=a926.img
+EXT_ENV_SP7350=uEnv_sp7350.txt
 RC_SDCARDBOOTDIR=$ROOT_DIR_IN/etc/init.d
 RC_SDCARDBOOTFILE=rc.sdcardboot
 FIP_IMG=fip.img
@@ -60,7 +57,7 @@ if [ ! -d $ROOT_DIR_IN ]; then
 fi
 
 # cp uEnv.txt to out/sdcardboot
-cp $EXT_ENV_A64_SP7350 $OUTPATH/$EXT_ENV
+cp $EXT_ENV_SP7350 $OUTPATH/$EXT_ENV
 
 # Calculate parameter.
 partition_size_1=$(($FAT_IMG_SIZE_M*1024*1024))
@@ -96,15 +93,7 @@ fi
 
 if [ -x "$(command -v mcopy)" ]; then
 	echo '###### do the mcopy cmd ########'
-	# q645 & q654 add fip.img in sdcard
-	if [[ $1 -eq "2" ]]||[[ $1 -eq "3" ]]; then
-		mcopy -i "$FAT_IMG_OUT" -s "$FAT_FILE_IN/ISPBOOOT.BIN" "$OUTPATH/$EXT_ENV"  "$OUTPATH/$FIP_IMG"  "$FAT_FILE_IN/uImage" "$FAT_FILE_IN/u-boot.img" ::
-	else
-	mcopy -i "$FAT_IMG_OUT" -s "$FAT_FILE_IN/ISPBOOOT.BIN" "$OUTPATH/$EXT_ENV" "$FAT_FILE_IN/uImage" "$FAT_FILE_IN/u-boot.img" ::
-	fi
-	if [ -f $FAT_FILE_IN/$NONOS_IMG ]; then
-		mcopy -i "$FAT_IMG_OUT" -s "$FAT_FILE_IN/$NONOS_IMG" ::
-	fi
+	mcopy -i "$FAT_IMG_OUT" -s "$FAT_FILE_IN/ISPBOOOT.BIN" "$OUTPATH/$EXT_ENV"  "$OUTPATH/$FIP_IMG"  "$FAT_FILE_IN/uImage" "$FAT_FILE_IN/u-boot.img" ::
 	if [ $? -ne 0 ]; then
 		exit
 	fi
