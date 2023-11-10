@@ -231,6 +231,9 @@ __config: hsm_init clean
 
 config: init
 	@$(MAKE) __config
+	@if [ -x /usr/local/bin/c3v_config_ext ]; then \
+		/usr/local/bin/c3v_config_ext; \
+	fi
 
 hconfig:
 	@./build/hconfig.sh
