@@ -231,8 +231,8 @@ __config: hsm_init clean
 
 config: init
 	@$(MAKE) __config
-	@if [ -x /usr/local/bin/c3v_config_ext ]; then \
-		/usr/local/bin/c3v_config_ext; \
+	@if [ -x /usr/local/bin/sunplus-config-ext ]; then \
+		/usr/local/bin/sunplus-config-ext; \
 	fi
 
 hconfig:
