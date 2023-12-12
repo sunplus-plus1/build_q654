@@ -39,14 +39,18 @@ fi
 partition=(xboot1 uboot1 uboot2 fip env env_redund dtb kernel rootfs)
 size=(0x100000 0x100000 0x100000 0x200000 0x80000 0x80000 0x40000 0x1900000 $NAND_SIZE)
 
+# If NAND Flash block_size > partition_size, round up partiton_size to block_size.
+# TODO: Here only consider the simple case, How about 'partition_size % block_size != 0'?
 if [ -n "$4" ] && [ -n "$5" ]; then
 	BLOCK_SIZE=$(($4*$5*1024))
+	echo "ISP partition size"
 	for i in ${!size[@]}; do
+		echo -n "   " ${partition[$i]}
 		if [ "${BLOCK_SIZE}" -gt "$((size[$i]))" ]; then
 			size[$i]=${BLOCK_SIZE}
-			echo ">>>" ${partition[$i]} "up to" ${BLOCK_SIZE}
+			echo -n -e "\033[0;1;31;40m up to\033[0m"
 		fi
-		printf "%x\n" $((size[$i]))
+		printf " 0x%x\n" $((size[$i]))
 	done
 fi
 

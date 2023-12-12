@@ -83,16 +83,14 @@
 #define ARGC_PACK_IMAGE_XBOOT1_PARTITION_SIZE        (6)
 #define ARGC_PACK_IMAGE_UBOOT1_FILE                  (7)    // UBOOT-1 (factory default) programmed in NAND/eMMC
 #define ARGC_PACK_IMAGE_UBOOT1_PARTITION_SIZE        (8)
-#ifndef FIP
 #define ARGC_PACK_IMAGE_UBOOT2_FILE                  (9)    // UBOOT-2 (latest update) programmed in NAND/eMMC
 #define ARGC_PACK_IMAGE_UBOOT2_PARTITION_SIZE       (10)
+#ifndef FIP
 #define ARGC_PACK_IMAGE_BINARY_PARTITION1_FILE      (11)
 #define ARGC_PACK_IMAGE_BINARY_PARTITION1_SIZE      (12)
 #define ARGC_PACK_IMAGE_BINARY_PARTITION2_FILE      (13)
 #define ARGC_PACK_IMAGE_BINARY_PARTITION2_SIZE      (14)
 #else
-#define ARGC_PACK_IMAGE_UBOOT2_FILE                  (9)    // UBOOT-2 programmed in NAND/eMMC
-#define ARGC_PACK_IMAGE_UBOOT2_PARTITION_SIZE       (10)
 #define ARGC_PACK_IMAGE_FIP_FILE                    (11)    // FIP (latest update) programmed in NAND/eMMC
 #define ARGC_PACK_IMAGE_FIP_PARTITION_SIZE          (12)
 #define ARGC_PACK_IMAGE_BINARY_PARTITION1_FILE      (13)
@@ -966,7 +964,7 @@ int pack_image(int argc, char **argv)
 	u32 tmp_u32, isp_script_size[NUM_STORAGE], file_offset_isp_script[NUM_STORAGE];
 	u32 offset_of_last_file;
 	u32 next_partition_start_address;
-	int idx_last_info_of_binary_partition = argc;
+	int idx_last_info_of_binary_partition = argc - 1;
 	int idx_partition_info;
 	long tmp_u64;
 	int rootfs_gt_4GB = 0;
