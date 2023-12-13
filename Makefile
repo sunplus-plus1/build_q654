@@ -451,10 +451,6 @@ initramfs:
 	@$(MAKE_ARCH) -C $(ROOTFS_PATH) CROSS=$(CROSS_COMPILE_FOR_ROOTFS) initramfs rootfs_cfg=$(ROOTFS_CONFIG) boot_from=$(BOOT_FROM) ROOTFS_CONTENT=$(ROOTFS_CONTENT)
 
 rootfs:
-	$(RM) -f $(ROOTFS_DIR)/lib/firmware/ethosn.bin
-	$(RM) -f $(ROOTFS_DIR)/lib64/libEthosNDriver.so
-	$(RM) -f $(ROOTFS_DIR)/lib64/libEthosNSupport.so
-
 	@$(MAKE_ARCH) -C $(ROOTFS_PATH) CROSS=$(CROSS_COMPILE_FOR_ROOTFS) rootfs rootfs_cfg=$(ROOTFS_CONFIG) boot_from=$(BOOT_FROM) ROOTFS_CONTENT=$(ROOTFS_CONTENT) \
 	FLASH_SIZE=$(FLASH_SIZE) NAND_PAGE_SIZE=$(NAND_PAGE_SIZE) NAND_PAGE_CNT=$(NAND_PAGE_CNT)
 
