@@ -574,10 +574,14 @@ $ECHO $COLOR_YELLOW"[2] eCV5546 XINK Board"$COLOR_ORIGIN
 #$ECHO $COLOR_YELLOW"[9] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
 read board
 
-if [ "$board" = "1" -o "$board" = "2" -o "$board" = "9" ]; then
+if [ "$board" = "1" -o "$board" = "9" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-ev" >> $BUILD_CONFIG
+elif [ "$board" = "2" ]; then
+	ARCH=arm64
+	echo "CHIP=SP7350" > $BUILD_CONFIG
+	echo "LINUX_DTB=sunplus/ecv5546-xink" >> $BUILD_CONFIG
 else
 	echo "Error: Unknown board!"
 	exit 1
@@ -634,8 +638,13 @@ if [ "$board" = "1" -o "$board" = "2" -o "$board" = "9" ]; then
 	fi
 	set_config_directly=1
 	chip_name="sp7350"
-fi
 
+	if [ "$board" = "2" ]; then
+		sel_board=xink
+		chip_name="ecv5546"
+	fi
+fi
+set -x
 if [ "$set_config_directly" = "1" ]; then
 	xboot_bootdev=$bootdev
 	if [ "$bootdev" = "sdcard" -o "$bootdev" = "usb" ]; then
