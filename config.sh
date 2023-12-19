@@ -542,16 +542,16 @@ list_config()
 
 		if [ "$bootdev" = "emmc" -o "$bootdev" = "usb" -o "$bootdev" = "sdcard"  ]; then
 			$ECHO $COLOR_GREEN"Select rootfs:"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[1] BusyBox"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[2] Yocto"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[3] Ubuntu Server 20.04"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[1] BusyBox 1.31.1"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[2] Ubuntu Server 20.04"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[3] Yocto"$COLOR_ORIGIN
 			read sel
 			case "$sel" in
 			"2")
-				rootfs_content=YOCTO
+				rootfs_content=ubuntu-server-20.04
 				;;
 			"3")
-				rootfs_content=ubuntu-server-20.04
+				rootfs_content=YOCTO
 				;;
 			*)
 				sel=1
