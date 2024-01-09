@@ -644,7 +644,7 @@ if [ "$board" = "1" -o "$board" = "2" -o "$board" = "9" ]; then
 		chip_name="ecv5546"
 	fi
 fi
-set -x
+
 if [ "$set_config_directly" = "1" ]; then
 	xboot_bootdev=$bootdev
 	if [ "$bootdev" = "sdcard" -o "$bootdev" = "usb" ]; then
