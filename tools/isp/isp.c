@@ -136,6 +136,8 @@
 
 #define NAND_UBI_VID_HEAD_OFFSET                    (NAND_PAGE_SIZE)
 
+#define ROOTFS_SEG_LIMIT                            0xf8000000UL
+
 typedef unsigned char u08;
 typedef uint32_t      u32;
 typedef uint64_t      u64;
@@ -694,7 +696,7 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 					// fprintf(fd, "ispsp progress 0x%lx 0x00\n", size);
 					size_programmed += size;
 					file_size       -= size;
-				 }
+				}
 			} else if (nand_or_emmc == IDX_EMMC) {
 				int rootfs_gt_4GB = 0;
 				int ispboot_num = 0;
@@ -702,7 +704,7 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 
 				file_size = isp_info.file_header.partition_info[i].file_size;
 				if (strcmp(isp_info.file_header.partition_info[i].file_name, "rootfs") == 0) {
-					if (file_size > 0xfc000000UL) {
+					if (file_size > ROOTFS_SEG_LIMIT) {
 						rootfs_gt_4GB = 1;
 					}
 				}
@@ -723,8 +725,8 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 					//size = (file_size > 0x2000000UL) ? 0x2000000UL : file_size;
 					//size = (file_size > 0x1000000UL) ? 0x1000000UL : file_size;
 					//size = (file_size > 0x800000UL) ? 0x800000UL : file_size;
-					if (rootfs_gt_4GB && ((partition_programmed + size) > 0xfc000000UL)) {
-						size = 0xfc000000UL - partition_programmed;
+					if (rootfs_gt_4GB && ((partition_programmed + size) > ROOTFS_SEG_LIMIT)) {
+						size = ROOTFS_SEG_LIMIT - partition_programmed;
 					}
 					if (ispboot_num == 0) {
 						fprintf(fd, "fatload $isp_if $isp_dev $isp_ram_addr /%s 0x%lx 0x%lx\n", basename(isp_info.file_name_pack_image), size,
@@ -745,7 +747,7 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 
 					if (rootfs_gt_4GB) {
 						partition_programmed += size;
-						if (partition_programmed >= 0xfc000000UL) {
+						if (partition_programmed >= ROOTFS_SEG_LIMIT) {
 							partition_programmed = 0;
 							ispboot_num++;
 						}
@@ -1098,7 +1100,7 @@ int pack_image(int argc, char **argv)
 				tmp_u64 = (tmp_u64 + 0x3ff) & 0xfffffffffffffc00UL;     // Align to 1k
 				// printf("File size of %s is %lu, extend it to %lu\n", isp_info.full_file_name[i], file_stat.st_size, tmp_u64);
 				if (strcmp(isp_info.file_header.partition_info[i].file_name, "rootfs") == 0) {
-					if (tmp_u64 > 0xfc000000UL) {
+					if (tmp_u64 > ROOTFS_SEG_LIMIT) {
 						rootfs_gt_4GB = 1;
 					}
 				}
@@ -1115,7 +1117,7 @@ int pack_image(int argc, char **argv)
 
 				isp_info.file_header.partition_info[i].file_offset = offset_of_last_file;
 				if (rootfs_gt_4GB) {
-					offset_of_last_file += 0xfc000000U;
+					offset_of_last_file += ROOTFS_SEG_LIMIT;
 				} else {
 					offset_of_last_file += tmp_u64;
 				}
@@ -1181,7 +1183,7 @@ int pack_image(int argc, char **argv)
 	for (i = 0; i < NUM_OF_PARTITION; i++) {
 		if (isp_info.file_header.partition_info[i].partition_size != 0) {
 			if ((strcmp(isp_info.file_header.partition_info[i].file_name, "rootfs") == 0) && rootfs_gt_4GB) {
-				sprintf(cmd, "head -c 4227858432 %s >> %s", isp_info.full_file_name[i], tmp_file);
+				sprintf(cmd, "head -c %lu %s >> %s", ROOTFS_SEG_LIMIT, isp_info.full_file_name[i], tmp_file);
 				// printf("%s\n", cmd);
 				system(cmd);
 
@@ -1190,22 +1192,22 @@ int pack_image(int argc, char **argv)
 				strncpy(ispbooot_fn, isp_info.file_name_pack_image, sizeof(ispbooot_fn));
 
 				tmp_u32 = isp_info.file_header.partition_info[i].file_size / 0x400U;    // Convert 1k
-				tmp_u32 -= 4128768U;
+				tmp_u32 -= (ROOTFS_SEG_LIMIT/0x400U);
 				u32 n = 1;
-				u32 sk = 4128768UL;     // 4032M
+				u32 sk = (ROOTFS_SEG_LIMIT/0x400U);
 				u32 sz;
 				while (1) {
-					sz = (tmp_u32 > 4128768U) ? 4128768U : tmp_u32;
+					sz = (tmp_u32 > (ROOTFS_SEG_LIMIT/0x400U)) ? (ROOTFS_SEG_LIMIT/0x400U) : tmp_u32;
 
 					snprintf(ispbootx_fn, sizeof(ispbootx_fn), "%s/ISPBOOT%d.BIN", dirname(ispbooot_fn), n);
 					snprintf(cmd, sizeof(cmd), "dd if=%s of=%s bs=1024 skip=%u count=%u", isp_info.full_file_name[i], ispbootx_fn, sk, sz);
 					// printf("%s\n", cmd);
 					system(cmd);
 
-					if (tmp_u32 <= 4128768U) break;
+					if (tmp_u32 <= (ROOTFS_SEG_LIMIT/0x400U)) break;
 
-					tmp_u32 -= 4128768U;
-					sk += 4128768UL;
+					tmp_u32 -= (ROOTFS_SEG_LIMIT/0x400U);
+					sk += (ROOTFS_SEG_LIMIT/0x400U);
 					n++;
 				}
 			} else {
@@ -2139,7 +2141,7 @@ int gen_nor_isp_script(const char *file_name_isp_script)
 	//reset spi nor controller for 32M and 64M flash
 	fprintf(fd, "mw 0xf8800018 0x00020002 0x1\n");
 	fprintf(fd, "mw 0xf8800018 0x00020000 0x1\n");
-	
+
 	fprintf(fd, "echo \"**************************************************\"\n");
 	fprintf(fd, "echo \"              ISP all: Done                       \"\n");
 	fprintf(fd, "echo \"**************************************************\"\n");
