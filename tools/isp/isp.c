@@ -131,7 +131,7 @@
 #define ADDRESS_NAND_1ST_PARTITION                  0x600000
 #endif
 
-#define MAX_MEM_SIZE_FOR_ISP                        (2 << 20)       // Must be N*(block size), where N=1, 2, ...
+#define MAX_MEM_SIZE_FOR_ISP                        (16 << 20)      // Must be N*(block size), where N=1, 2, ...
 #define GPT_HEADER_SIZE                             (17 << 10)      // GUID Partition header size: (512-byte MBR) + (512-byte header) + (128 bytes * 128 partitions)
 
 #define NAND_UBI_VID_HEAD_OFFSET                    (NAND_PAGE_SIZE)
