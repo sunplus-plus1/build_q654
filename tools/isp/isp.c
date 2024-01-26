@@ -125,10 +125,10 @@
 // If it is changed, env address (CONFIG_ENV_OFFSET) and env_redund (CONFIG_ENV_OFFSET_REDUND)
 // in pentagram_common.h also need to be changed.
 #ifndef FIP
-#define ADDRESS_NAND_1ST_PARTITION                  0x400000
-#else
-#define ADDRESS_NAND_FIP_PARTITION                  0x400000
 #define ADDRESS_NAND_1ST_PARTITION                  0x600000
+#else
+#define ADDRESS_NAND_FIP_PARTITION                  0x600000    //fip partition offset, used in xboot to load fip from fixed address
+#define ADDRESS_NAND_1ST_PARTITION                  0x800000    //1st partition offset of none-1k60
 #endif
 
 #define MAX_MEM_SIZE_FOR_ISP                        (16 << 20)      // Must be N*(block size), where N=1, 2, ...
