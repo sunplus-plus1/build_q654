@@ -521,7 +521,8 @@ list_config()
 			$ECHO $COLOR_YELLOW"[1] BusyBox 1.31.1"$COLOR_ORIGIN
 			$ECHO $COLOR_YELLOW"[2] Ubuntu Server 20.04"$COLOR_ORIGIN
 			$ECHO $COLOR_YELLOW"[3] Ubuntu MATE 20.04"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[4] Yocto"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[4] Ubuntu XFCE 20.04"$COLOR_ORIGIN
+			$ECHO $COLOR_YELLOW"[5] Yocto"$COLOR_ORIGIN
 			read sel
 			case "$sel" in
 			"2")
@@ -531,6 +532,9 @@ list_config()
 				rootfs_content=ubuntu-mate-20.04
 				;;
 			"4")
+				rootfs_content=ubuntu-xfce-20.04
+				;;
+			"5")
 				rootfs_content=YOCTO
 				;;
 			*)
