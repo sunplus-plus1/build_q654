@@ -19,8 +19,8 @@ def setting_attr(root, attr_file):
             uid=result[1]
             gid=result[2]
             path=result[3]
-            os.chmod(root + path[1:], int(mode, 8))
             os.chown(root + path[1:], int(uid), int(gid))
+            os.chmod(root + path[1:], int(mode, 8))
 
 if __name__=="__main__":
     if len(sys.argv) < 3:
