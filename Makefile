@@ -196,6 +196,7 @@ clean:
 	@$(MAKE) -C $(TOPDIR)/$(BUILD_PATH)/tools/isp $@
 	@$(RM) -rf $(OUT_PATH)
 	@cd optee; ./optee_clean.sh;cd ..;
+	@$(MAKE) -C $(FIP_PATH) clean
 
 distclean: clean
 	@$(MAKE) -C $(IPACK_PATH) $@
