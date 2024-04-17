@@ -556,7 +556,7 @@ $ECHO $COLOR_GREEN"Select boards:"$COLOR_ORIGIN
 $ECHO $COLOR_YELLOW"[1] SP7350 Ev Board"$COLOR_ORIGIN
 $ECHO $COLOR_YELLOW"[2] SP7350 Demo Board"$COLOR_ORIGIN
 $ECHO $COLOR_YELLOW"[3] SP7350 Dual Ev Board"$COLOR_ORIGIN
-$ECHO $COLOR_YELLOW"[4] eCV5546 XINK Board"$COLOR_ORIGIN
+$ECHO $COLOR_YELLOW"[4] SP7350 XINK Board"$COLOR_ORIGIN
 #$ECHO $COLOR_YELLOW"[9] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
 read board
 
@@ -575,7 +575,7 @@ elif [ "$board" = "3" ]; then
 elif [ "$board" = "4" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
-	echo "LINUX_DTB=sunplus/ecv5546-xink" >> $BUILD_CONFIG
+	echo "LINUX_DTB=sunplus/sp7350-xink" >> $BUILD_CONFIG
 else
 	echo "Error: Unknown board!"
 	exit 1
@@ -632,7 +632,6 @@ if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$b
 		sel_board=dev
 	elif [ "$board" = "4" ]; then
 		sel_board=xink
-		chip_name="ecv5546"
 	elif [ "$board" = "9" ]; then
 		sel_board=zebu
 	fi
