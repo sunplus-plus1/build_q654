@@ -517,29 +517,33 @@ list_config()
 		fi
 
 		if [ "$bootdev" = "emmc" -o "$bootdev" = "usb" -o "$bootdev" = "sdcard"  ]; then
-			$ECHO $COLOR_GREEN"Select rootfs:"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[1] BusyBox 1.31.1"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[2] Ubuntu Server 20.04"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[3] Ubuntu MATE 20.04"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[4] Ubuntu XFCE 20.04"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[5] Yocto"$COLOR_ORIGIN
+			menu='linux/rootfs/tools/menu.sh'
+			if [ ! -f "$menu" ]; then
+				echo "Error: $menu not found!"
+				exit 1
+			fi
+
+			. $menu
+			menu_rootfs_title_num
+			if [ "$MENU_ROOTFS_NUM" == "0" ]; then
+				echo "Error: Rootfs not found!"
+				exit 1
+			fi
+
+			idx=1
+			$ECHO ${COLOR_GREEN}"Select rootfs:"$COLOR_ORIGIN
+			for n in $(seq -s ' ' $MENU_ROOTFS_NUM)
+			do
+				$ECHO $COLOR_YELLOW"[$idx] $(menu_rootfs_title $n)"$COLOR_ORIGIN
+				idx=$((idx + 1))
+			done
+
 			read sel
-			case "$sel" in
-			"2")
-				rootfs_content=ubuntu-server-20.04
-				;;
-			"3")
-				rootfs_content=ubuntu-mate-20.04
-				;;
-			"4")
-				rootfs_content=ubuntu-xfce-20.04
-				;;
-			"5")
-				rootfs_content=YOCTO
-				;;
-			*)
-				sel=1
-			esac
+			rootfs_content=$(menu_rootfs_content $sel)
+			if [ -z "$rootfs_content" ]; then
+				echo "Error: Unknown config!"
+				exit 1
+			fi
 		fi
 	elif [ "$board" = "9" ]; then
 		zmem=1
