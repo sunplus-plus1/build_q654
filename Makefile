@@ -159,6 +159,29 @@ kernel: check
 	@$(MAKE_ARCH) $(MAKE_JOBS) -C $(LINUX_PATH) modules_install INSTALL_MOD_PATH=../../$(ROOTFS_DIR) CROSS_COMPILE=$(CROSS_COMPILE_FOR_LINUX);
 	@$(RM) -f $(ROOTFS_DIR)/lib/modules/$(KERNELRELEASE)/build;
 	@$(RM) -f $(ROOTFS_DIR)/lib/modules/$(KERNELRELEASE)/source;
+	@if [ "$(BOOT_FROM)" != "SPINOR" ] && [ "$(BOOT_FROM)" != "NOR_JFFS2" ]; then \
+		if [ -d ${ROOTFS_DIR} ] && [ -f $(LINUX_PATH)/.config ]; then \
+			vip9000sdk64185=`grep CONFIG_v6_4_18_5=y $(LINUX_PATH)/.config`; \
+			vip9000sdk64159=`grep CONFIG_v6_4_15_9=y $(LINUX_PATH)/.config`; \
+			if [ "$$vip9000sdk64185" != "" ]; then	\
+				$(ECHO) $(COLOR_YELLOW)"Change VIP9000SDK Version in rootfs for CONFIG_v6_4_18_5."$(COLOR_ORIGIN); \
+				if [ -d ${ROOTFS_DIR}/lib64 ]; then \
+					$(CP) $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.18.5/drivers/* ${ROOTFS_DIR}/lib64; \
+				else \
+					$(CP) $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.18.5/drivers/* ${ROOTFS_DIR}/usr/lib; \
+					$(CP) -R $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.18.5/include/* ${ROOTFS_DIR}/usr/include; \
+				fi \
+			elif [ "$$vip9000sdk64159" != "" ]; then \
+				$(ECHO) $(COLOR_YELLOW)"Change VIP9000SDK Version in rootfs for CONFIG_v6_4_15_9."$(COLOR_ORIGIN); \
+				if [ -d ${ROOTFS_DIR}/lib64 ]; then \
+					$(CP) $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.15.9/drivers/* ${ROOTFS_DIR}/lib64; \
+				else \
+					$(CP) $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.15.9/drivers/* ${ROOTFS_DIR}/usr/lib; \
+					$(CP) -R $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.15.9/include/* ${ROOTFS_DIR}/usr/include; \
+				fi \
+			fi \
+		fi \
+	fi
 	@$(RM) -f $(LINUX_PATH)/arch/$(ARCH)/boot/$(KERNEL_ARM64_BIN);
 	@$(MAKE_ARCH) $(MAKE_JOBS) -C $(LINUX_PATH) $(KERNEL_ARM64_BIN) V=0 CROSS_COMPILE=$(CROSS_COMPILE_FOR_LINUX);
 	@$(MAKE) secure SECURE_PATH=kernel;
