@@ -53,6 +53,7 @@ KERNEL_BIN = uImage
 DTB = dtb
 VMLINUX = vmlinux
 ROOTFS_DIR = $(ROOTFS_PATH)/initramfs/disk
+BUILDROOT_DIR = $(ROOTFS_PATH)/initramfs/buildroot
 ROOTFS_IMG = rootfs.img
 FREERTOS_IMG = freertos.img
 
@@ -92,14 +93,17 @@ SPI_BIN = spi_all.bin
 DOWN_TOOL = down_32M.exe
 SECURE_PATH ?=
 
-.PHONY: all xboot uboot kenel rom clean distclean config init check rootfs info firmware freertos toolchain
-.PHONY: dtb spirom isp tool_isp kconfig uconfig xconfig
+.PHONY: all buildroot xboot uboot kenel rom clean distclean config init check rootfs info firmware freertos toolchain
+.PHONY: dtb spirom isp tool_isp kconfig uconfig xconfig bconfig
 
 # rootfs image is created by :
 # make initramfs -> re-create initial disk/
 # make kernel    -> install kernel modules to disk/lib/modules/
 # make rootfs    -> create rootfs image from disk/
+# or use buildroot to create 
+
 all: check
+	@$(MAKE) buildroot
 	@$(MAKE) xboot
 	@$(MAKE) dtb
 	@$(MAKE) uboot
@@ -216,6 +220,7 @@ distclean: clean
 	@$(MAKE_ARCH) -C $(LINUX_PATH) $@
 	@$(RM) -f $(CONFIG_ROOT)
 	@$(RM) -f $(HW_CONFIG_ROOT)
+	@$(MAKE) -C $(BUILDROOT_DIR) clean
 
 __config: hsm_init clean
 	@if [ -z $(HCONFIG) ]; then \
@@ -467,6 +472,31 @@ initramfs:
 rootfs:
 	@$(MAKE_ARCH) -C $(ROOTFS_PATH) CROSS=$(CROSS_COMPILE_FOR_ROOTFS) rootfs rootfs_cfg=$(ROOTFS_CONFIG) boot_from=$(BOOT_FROM) ROOTFS_CONTENT=$(ROOTFS_CONTENT) \
 	FLASH_SIZE=$(FLASH_SIZE) NAND_PAGE_SIZE=$(NAND_PAGE_SIZE) NAND_PAGE_CNT=$(NAND_PAGE_CNT)
+
+bconfig:
+	@if [ -f "$(BUILDROOT_DIR)/.config.old" ]; then \
+		rm $(BUILDROOT_DIR)/.config.old; \
+	fi
+	@$(MAKE_ARCH) -C $(BUILDROOT_DIR) menuconfig
+	@if ! diff $(BUILDROOT_DIR)/.config $(BUILDROOT_DIR)/.config.old; then \
+		if [ -f "$(ROOTFS_DIR)/lib/os-release" ]; then \
+			rm $(ROOTFS_DIR)/lib/os-release; \
+		fi; \
+    fi
+
+buildroot:
+	@if [ "$(ROOTFS_CONTENT)" = "BUILDROOT" ]; then \
+		if [ ! -f "$(ROOTFS_DIR)/lib/os-release" ]; then \
+			$(MAKE_ARCH) -C $(BUILDROOT_DIR); \
+			$(eval BUILD_IMAGE := $(BUILDROOT_DIR)/output/images) \
+			if [ -f "$(BUILD_IMAGE)/rootfs.tar" ]; then \
+				rm -rf $(ROOTFS_DIR); \
+				mkdir $(ROOTFS_DIR); \
+				tar xvf ${BUILD_IMAGE}/rootfs.tar -C $(ROOTFS_DIR); \
+				mkdir -p ${ROOTFS_DIR}/lib/firmware; \
+			fi; \
+		fi; \
+	fi
 
 kconfig:
 	$(MAKE_ARCH) -C $(LINUX_PATH) CROSS_COMPILE=$(CROSS_COMPILE_FOR_LINUX) menuconfig
