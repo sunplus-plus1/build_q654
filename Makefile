@@ -487,14 +487,19 @@ bconfig:
 buildroot:
 	@if [ "$(ROOTFS_CONTENT)" = "BUILDROOT" ]; then \
 		if [ ! -f "$(ROOTFS_DIR)/lib/os-release" ]; then \
+			if [ ! -f "$(BUILDROOT_DIR)/.config" ]; then \
+				$(MAKE_ARCH) -C $(BUILDROOT_DIR) sunplus_$(CHIP)_defconfig; \
+			fi; \
 			$(MAKE_ARCH) -C $(BUILDROOT_DIR); \
 			$(eval BUILD_IMAGE := $(BUILDROOT_DIR)/output/images) \
 			if [ -f "$(BUILD_IMAGE)/rootfs.tar" ]; then \
 				rm -rf $(ROOTFS_DIR); \
 				mkdir $(ROOTFS_DIR); \
-				tar xvf ${BUILD_IMAGE}/rootfs.tar -C $(ROOTFS_DIR); \
+				tar xvf ${BUILD_IMAGE}/rootfs.tar -C $(ROOTFS_DIR) > /dev/null; \
 				mkdir -p ${ROOTFS_DIR}/lib/firmware; \
 			fi; \
+		else \
+			$(ECHO) $(COLOR_YELLOW)"Buildroot has been compiled."$(COLOR_ORIGIN); \
 		fi; \
 	fi
 
