@@ -486,9 +486,11 @@ bconfig:
 
 buildroot:
 	@if [ "$(ROOTFS_CONTENT)" = "BUILDROOT" ]; then \
+		set -e; \
 		if [ ! -f "$(ROOTFS_DIR)/lib/os-release" ]; then \
 			if [ ! -f "$(BUILDROOT_DIR)/.config" ]; then \
-				$(MAKE_ARCH) -C $(BUILDROOT_DIR) sunplus_$(CHIP)_defconfig; \
+				lowercase_string=$(shell echo $(CHIP) | tr '[:upper:]' '[:lower:]'); \
+				$(MAKE_ARCH) -C $(BUILDROOT_DIR) $${lowercase_string}_defconfig; \
 			fi; \
 			$(MAKE_ARCH) -C $(BUILDROOT_DIR); \
 			$(eval BUILD_IMAGE := $(BUILDROOT_DIR)/output/images) \
