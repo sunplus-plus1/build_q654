@@ -169,28 +169,34 @@ kernel: check
 			vip9000sdk64159=`grep CONFIG_v6_4_15_9=y $(LINUX_PATH)/.config`; \
 			vip9000sdk64138=`grep CONFIG_v6_4_13_8=y $(LINUX_PATH)/.config`; \
 			if [ "$$vip9000sdk64185" != "" ]; then	\
-				$(ECHO) $(COLOR_YELLOW)"Change VIP9000SDK Version in rootfs for CONFIG_v6_4_18_5."$(COLOR_ORIGIN); \
+				$(ECHO) $(COLOR_YELLOW)"Copy VIP9000SDK files in rootfs for CONFIG_v6_4_18_5."$(COLOR_ORIGIN); \
 				if [ -d ${ROOTFS_DIR}/lib64 ]; then \
-					$(CP) -f $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.18.5/drivers/* ${ROOTFS_DIR}/lib64; \
+					$(CP) -fa $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.18.5/drivers/* ${ROOTFS_DIR}/lib64; \
+					$(MKDIR) -p ${ROOTFS_DIR}/usr/include; \
+					$(CP) -faR $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.18.5/include/* ${ROOTFS_DIR}/usr/include; \
 				else \
-					$(CP) -f $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.18.5/drivers/* ${ROOTFS_DIR}/usr/lib; \
-					$(CP) -fR $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.18.5/include/* ${ROOTFS_DIR}/usr/include; \
+					$(CP) -fa $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.18.5/drivers/* ${ROOTFS_DIR}/usr/lib; \
+					$(CP) -faR $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.18.5/include/* ${ROOTFS_DIR}/usr/include; \
 				fi \
 			elif [ "$$vip9000sdk64159" != "" ]; then \
-				$(ECHO) $(COLOR_YELLOW)"Change VIP9000SDK Version in rootfs for CONFIG_v6_4_15_9."$(COLOR_ORIGIN); \
+				$(ECHO) $(COLOR_YELLOW)"Copy VIP9000SDK files in rootfs for CONFIG_v6_4_15_9."$(COLOR_ORIGIN); \
 				if [ -d ${ROOTFS_DIR}/lib64 ]; then \
-					$(CP) -f $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.15.9/drivers/* ${ROOTFS_DIR}/lib64; \
+					$(CP) -fa $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.15.9/drivers/* ${ROOTFS_DIR}/lib64; \
+					$(MKDIR) -p ${ROOTFS_DIR}/usr/include; \
+					$(CP) -faR $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.15.9/include/* ${ROOTFS_DIR}/usr/include; \
 				else \
-					$(CP) -f $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.15.9/drivers/* ${ROOTFS_DIR}/usr/lib; \
-					$(CP) -fR $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.15.9/include/* ${ROOTFS_DIR}/usr/include; \
+					$(CP) -fa $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.15.9/drivers/* ${ROOTFS_DIR}/usr/lib; \
+					$(CP) -faR $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.15.9/include/* ${ROOTFS_DIR}/usr/include; \
 				fi \
 			elif [ "$$vip9000sdk64138" != "" ]; then \
-				$(ECHO) $(COLOR_YELLOW)"Change VIP9000SDK Version in rootfs for CONFIG_v6_4_13_8."$(COLOR_ORIGIN); \
+				$(ECHO) $(COLOR_YELLOW)"Copy VIP9000SDK files in rootfs for CONFIG_v6_4_13_8."$(COLOR_ORIGIN); \
 				if [ -d ${ROOTFS_DIR}/lib64 ]; then \
-					$(CP) -f $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.13.8/drivers/* ${ROOTFS_DIR}/lib64; \
+					$(CP) -fa $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.13.8/drivers/* ${ROOTFS_DIR}/lib64; \
+					$(MKDIR) -p ${ROOTFS_DIR}/usr/include; \
+					$(CP) -faR $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.13.8/include/* ${ROOTFS_DIR}/usr/include; \
 				else \
-					$(CP) -f $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.13.8/drivers/* ${ROOTFS_DIR}/usr/lib; \
-					$(CP) -fR $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.13.8/include/* ${ROOTFS_DIR}/usr/include; \
+					$(CP) -fa $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.13.8/drivers/* ${ROOTFS_DIR}/usr/lib; \
+					$(CP) -faR $(ROOTFS_PATH)/initramfs/prebuilt/vip9000sdk/6.4.13.8/include/* ${ROOTFS_DIR}/usr/include; \
 				fi \
 			fi \
 		fi \
