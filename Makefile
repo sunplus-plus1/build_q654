@@ -5,9 +5,12 @@ include ./build/Makefile.tls
 include ./build/color.mak
 sinclude ./.config
 sinclude ./.hwconfig
+sinclude ./crossgcc/toolchain.config
 
-CROSS_ARM64_COMPILE = $(TOPDIR)/crossgcc/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
-CROSS_ARM64_XBOOT_COMPILE = $(TOPDIR)/crossgcc/gcc-arm-9.2-2019.12-x86_64-arm-none-eabi/bin/arm-none-eabi-
+export TOOLCHAIN_AARCH32_PATH TOOLCHAIN_AARCH32_PREFIX
+export TOOLCHAIN_AARCH64_PATH TOOLCHAIN_AARCH64_PREFIX
+CROSS_ARM64_COMPILE = $(TOOLCHAIN_AARCH64_PATH)/bin/$(TOOLCHAIN_AARCH64_PREFIX)-
+CROSS_ARM64_XBOOT_COMPILE = $(TOOLCHAIN_AARCH32_PATH)/bin/$(TOOLCHAIN_AARCH32_PREFIX)-
 
 NEED_ISP ?= 0
 ZEBU_RUN ?= 0
