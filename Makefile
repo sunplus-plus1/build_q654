@@ -493,6 +493,10 @@ bconfig:
 		fi; \
     fi
 
+reload_bconfig:
+	lowercase_string=$(shell echo $(CHIP) | tr '[:upper:]' '[:lower:]'); \
+	$(MAKE_ARCH) -C $(BUILDROOT_DIR) $${lowercase_string}_defconfig
+
 buildroot:
 	@if [ "$(ROOTFS_CONTENT)" = "BUILDROOT" ]; then \
 		set -e; \
