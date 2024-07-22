@@ -44,7 +44,7 @@ ROOTFS_PATH = linux/rootfs
 FIRMWARE_PATH = firmware/arduino_core_sunplus
 IPACK_PATH = ipack
 OUT_PATH = out
-SECURE_HSM_PATH = $(TOPDIR)/$(BUILD_PATH)/tools/secure_hsm/secure
+SECURE_TOOL_PATH = $(TOPDIR)/$(BUILD_PATH)/tools/secure_sp7350/secure
 FREERTOS_PATH = $(IPACK_PATH)
 FIP_PATH = boot/trusted-firmware-a
 KERNELRELEASE = $(shell cat $(LINUX_PATH)/include/config/kernel.release 2> /dev/null)
@@ -208,9 +208,6 @@ kernel: check
 	@$(MAKE_ARCH) $(MAKE_JOBS) -C $(LINUX_PATH) $(KERNEL_ARM64_BIN) V=0 CROSS_COMPILE=$(CROSS_COMPILE_FOR_LINUX);
 	@$(MAKE) secure SECURE_PATH=kernel;
 
-hsm_init:
-	@cd $(SECURE_HSM_PATH); ./gen_HSM_keys.sh ;
-
 clean:
 	@$(MAKE) -C $(FIRMWARE_PATH) CHIP=$(CHIP) $@
 	@$(MAKE) ARCH=$(ARCH_XBOOT) -C $(XBOOT_PATH) CROSS=$(CROSS_COMPILE_FOR_XBOOT) $@
@@ -231,7 +228,7 @@ distclean: clean
 	@$(RM) -f $(HW_CONFIG_ROOT)
 	@$(MAKE) -C $(BUILDROOT_DIR) clean
 
-__config: hsm_init clean
+__config: clean
 	@if [ -z $(HCONFIG) ]; then \
 		$(RM) -f $(HW_CONFIG_ROOT); \
 	fi
@@ -408,9 +405,9 @@ secure:
 			exit 1; \
 		fi; \
 		if [ "$(SECURE)" = "1" ]; then \
-			cd $(SECURE_HSM_PATH); ./clr_out.sh ; \
+			cd $(SECURE_TOOL_PATH); ./clr_out.sh ; \
 			./build_inputfile_sb.sh $(TOPDIR)/$(XBOOT_PATH)/bin/xboot.bin $(SB_FLAG);\
-			cp -f $(SECURE_HSM_PATH)/out/outfile_sb.bin $(TOPDIR)/$(XBOOT_PATH)/bin/xboot.bin ; \
+			cp -f $(SECURE_TOOL_PATH)/out/outfile_sb.bin $(TOPDIR)/$(XBOOT_PATH)/bin/xboot.bin ; \
 		fi ;\
 		cd $(TOPDIR)/$(XBOOT_PATH); \
 		bash ./add_xhdr.sh ./bin/xboot.bin ./bin/$(XBOOT_BIN) $(SECURE) ; \

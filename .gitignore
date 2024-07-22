@@ -7,9 +7,8 @@
 
 tools/isp/isp
 tools/isp/isp.o
-tools/secure_hsm/secure/build_keys
-tools/secure_hsm/secure/hsm_keys
-tools/secure_hsm/secure/otp_Device_keys
-tools/secure_hsm/secure/otp_Sb_keys
-tools/secure_hsm/secure/out
+tools/secure_sp7350/secure/build_keys
+tools/secure_sp7350/secure/otp_Device_keys
+tools/secure_sp7350/secure/otp_Sb_keys
+tools/secure_sp7350/secure/out
 

@@ -9,9 +9,9 @@ OPENSSL=./openssl
 SZ:=$(shell wc -c $(IMG)|cut -f1 -d" ")
 SZ:=$(shell echo "(16 - ($(SZ) % 16)) % 16" | bc)
 
-KEY1_BIN=../secure_hsm/secure/otp_Device_keys/x_priv_0.bin
-KEY1=$(shell cat ../secure_hsm/secure/otp_Device_keys/x_priv_0.hex)
-KEY2=$(shell cat ../secure_hsm/secure/otp_Sb_keys/ed_pub_0.hex)
+KEY1_BIN=../secure_sp7350/secure/otp_Device_keys/x_priv_0.bin
+KEY1=$(shell cat ../secure_sp7350/secure/otp_Device_keys/x_priv_0.hex)
+KEY2=$(shell cat ../secure_sp7350/secure/otp_Sb_keys/ed_pub_0.hex)
 KEY3=$(shell $(OPENSSL) enc -aes-256-ctr -K $(KEY2) -iv $(KEY2) -nosalt -in $(KEY1_BIN) | xxd -ps -c32)
 
 pk.pem:

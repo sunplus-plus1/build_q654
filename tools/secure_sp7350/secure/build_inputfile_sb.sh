@@ -4,12 +4,7 @@
 if [ ! -d otp_Device_keys ]; then
 ./gen_OTP_keys.sh
 fi
-#[ $? -ne 0 ] && echo "fail!" && exit 1
 
-# do this once to generate HSM keys
-if [ ! -d hsm_keys ]; then
-./gen_HSM_keys.sh
-fi
 #[ $? -ne 0 ] && echo "fail!" && exit 1
 
 echo "[secure] input file = $1 sb_info = $2"
