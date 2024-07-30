@@ -1,4 +1,5 @@
 #!/bin/bash
+
 TOP=../
 
 export PATH=$PATH:$TOP/build/tools/isp/
@@ -7,6 +8,23 @@ X=xboot.img
 U=u-boot.img
 K=uImage
 ROOTFS=rootfs.img
+OVERLAY=
+
+if [ "$OVERLAYFS" = "1" ]; then
+	OVERLAY=overlay
+	if [ "$1" != "SDCARD" ]; then
+		cp $ROOTFS rootfs
+		[ -f $OVERLAY ] && rm $OVERLAY
+		fallocate -l 200M $OVERLAY
+		dd if=/dev/zero of=$OVERLAY bs=1M count=0 seek=200
+		mkfs.ext4 $OVERLAY
+	fi
+	OVERLAY="$OVERLAY none"
+else
+	if [ "$1" != "SDCARD" ]; then
+		cp $ROOTFS rootfs
+	fi
+fi
 D=dtb
 F=fip.img
 
@@ -20,11 +38,6 @@ cp $U uboot2
 cp $K kernel
 
 cp $F fip
-
-if [ "$1" != "SDCARD" ]; then
-	cp $ROOTFS rootfs
-fi
-
 cp $D DTB
 
 if [ "$1" = "PNAND" ]; then
@@ -70,17 +83,32 @@ if [ "$1" = "EMMC" ]; then
 		EMMC_SIZE=0x100000000	# default size = 4GiB
 	fi
 	EMMC_SIZE=$(($EMMC_SIZE-0x2000000))
-	isp pack_image ISPBOOOT.BIN \
-		xboot0 uboot0 \
-		xboot1 0x100000 \
-		uboot1 0x100000 \
-		uboot2 0x100000 \
-		fip 0x100000 \
-		env 0x80000 \
-		env_redund 0x80000 \
-		dtb 0x40000 \
-		kernel 0x2000000 \
-		rootfs $EMMC_SIZE
+	if [ "$OVERLAYFS" = "1" ]; then
+		isp pack_image ISPBOOOT.BIN \
+			xboot0 uboot0 \
+			xboot1 0x100000 \
+			uboot1 0x100000 \
+			uboot2 0x100000 \
+			fip 0x100000 \
+			env 0x80000 \
+			env_redund 0x80000 \
+			dtb 0x40000 \
+			kernel 0x2000000 \
+			rootfs $EMMC_SIZE \
+			$OVERLAY
+	else	
+		isp pack_image ISPBOOOT.BIN \
+			xboot0 uboot0 \
+			xboot1 0x100000 \
+			uboot1 0x100000 \
+			uboot2 0x100000 \
+			fip 0x100000 \
+			env 0x80000 \
+			env_redund 0x80000 \
+			dtb 0x40000 \
+			kernel 0x2000000 \
+			rootfs $EMMC_SIZE
+	fi
 
 elif [ "$1" = "NAND" ]; then
 	if [ -n "$3" ]; then
@@ -135,6 +163,7 @@ rm -rf DTB
 rm -rf env
 rm -rf env_redund
 rm -rf rootfs
+rm -rf $OVERLAY
 rm -rf reserve
 rm -rf fip
 

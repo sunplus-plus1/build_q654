@@ -544,6 +544,20 @@ list_config()
 				echo "Error: Unknown config!"
 				exit 1
 			fi
+
+			if [ "$bootdev" = "emmc" ] && [ "$rootfs_content" == "BUILDROOT" ]; then
+                $ECHO $COLOR_GREEN"Use OVERLAYFS:"$COLOR_ORIGIN
+                $ECHO $COLOR_YELLOW"[1] YES"$COLOR_ORIGIN
+                $ECHO $COLOR_YELLOW"[2] NO"$COLOR_ORIGIN
+                read overlay
+                case "$overlay" in
+                "1")
+                    echo "OVERLAYFS=1" >> $BUILD_CONFIG
+                    ;;
+                *)
+                    ;;
+                esac
+            fi
 		fi
 	elif [ "$board" = "9" ]; then
 		zmem=1

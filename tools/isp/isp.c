@@ -215,6 +215,9 @@ struct isp_info_s isp_info;
 
 #define BYTE2BLOCK(x)                   ((x + 511) >> 9)    /* 512 bytes/sector */
 
+int OVERLAYFS = 0;
+char last_partition[32];
+
 void dump_isp_info(void)
 {
 	int i;
@@ -485,7 +488,8 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 #endif
 			fprintf(fd, "name=%s,", basename(isp_info.file_header.partition_info[i].file_name));
 			fprintf(fd, "uuid=${uuid_gpt_%s},", basename(isp_info.file_header.partition_info[i].file_name));
-			if (strcmp(isp_info.file_header.partition_info[i].file_name,"rootfs") == 0) {
+
+			if (strcmp(isp_info.file_header.partition_info[i].file_name, last_partition) == 0) {
 				// The emmc rootfs partition is set to EXT2 fs, and the partition size is all remaining space.
 				fprintf(fd, "size=-;");
 				break;
@@ -960,7 +964,7 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 int pack_image(int argc, char **argv)
 {
 	FILE *fd;
-	int i, j;
+	int i, j, set_partition_size;
 	struct stat file_stat;
 	char tmp_file[32], tmp_file2[32], tmp_file3[32], file_name_isp_script[NUM_STORAGE][32], cmd[1024];
 	u32 tmp_u32, isp_script_size[NUM_STORAGE], file_offset_isp_script[NUM_STORAGE];
@@ -1057,7 +1061,20 @@ int pack_image(int argc, char **argv)
 				printf("Error: %s: %d\n", __FILE__, __LINE__);
 				exit(-1);
 			}
-			isp_info.file_header.partition_info[idx_partition_info].partition_size = strtoull(argv[i], NULL, 0);
+			set_partition_size = 1;
+			if (OVERLAYFS)
+			{
+				if (strcmp(isp_info.file_header.partition_info[idx_partition_info].file_name, "rootfs") == 0 ||
+					strcmp(isp_info.file_header.partition_info[idx_partition_info].file_name, "overlay") == 0) {		
+					if (stat(isp_info.file_header.partition_info[idx_partition_info].file_name, &file_stat) == 0) {
+						tmp_u64 = file_stat.st_size;
+						tmp_u64 = (tmp_u64 + 0x3ff) & 0xfffffffffffffc00UL;
+						isp_info.file_header.partition_info[idx_partition_info].partition_size = tmp_u64;
+						set_partition_size = 0;
+					}
+				}
+			}			
+			if (set_partition_size) isp_info.file_header.partition_info[idx_partition_info].partition_size = strtoull(argv[i], NULL, 0);
 
 			idx_partition_info++;
 		}
@@ -2428,6 +2445,14 @@ int main(int argc, char **argv)
 		return -1;
 	} else
 		sub_cmd = argv[1];
+
+	char *penv_use_overlay = getenv("OVERLAYFS");
+	// printf("penv_use_overlay = %s\n", penv_use_overlay);
+	if (penv_use_overlay[0] != '\0') {
+		OVERLAYFS = atoi(penv_use_overlay);
+	}
+	strcpy(last_partition, "rootfs");
+	if (OVERLAYFS) strcpy(last_partition, "overlay");
 
 	/*
 	printf("--------------------------------\n");
