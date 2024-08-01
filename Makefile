@@ -99,7 +99,7 @@ SECURE_PATH ?=
 OVERLAYFS ?= 0
 
 .PHONY: all buildroot xboot uboot kenel rom clean distclean config init check rootfs info firmware freertos toolchain
-.PHONY: dtb spirom isp tool_isp kconfig uconfig xconfig bconfig
+.PHONY: dtb spirom isp tool_isp kconfig uconfig xconfig bconfig load_bconfig
 
 # rootfs image is created by :
 # make initramfs -> re-create initial disk/
@@ -481,7 +481,7 @@ rootfs:
 	@$(MAKE_ARCH) -C $(ROOTFS_PATH) CROSS=$(CROSS_COMPILE_FOR_ROOTFS) rootfs OVERLAYFS=$(OVERLAYFS) rootfs_cfg=$(ROOTFS_CONFIG) boot_from=$(BOOT_FROM) ROOTFS_CONTENT=$(ROOTFS_CONTENT) \
 	FLASH_SIZE=$(FLASH_SIZE) NAND_PAGE_SIZE=$(NAND_PAGE_SIZE) NAND_PAGE_CNT=$(NAND_PAGE_CNT)
 
-bconfig:
+bconfig: load_bconfig
 	@if [ -f "$(BUILDROOT_DIR)/.config.old" ]; then \
 		rm $(BUILDROOT_DIR)/.config.old; \
 	fi
@@ -492,18 +492,10 @@ bconfig:
 		fi; \
     fi
 
-reload_bconfig:
-	lowercase_string=$(shell echo $(CHIP) | tr '[:upper:]' '[:lower:]'); \
-	$(MAKE_ARCH) -C $(BUILDROOT_DIR) $${lowercase_string}_defconfig
-
-buildroot:
+buildroot: load_bconfig
 	@if [ "$(ROOTFS_CONTENT)" = "BUILDROOT" ]; then \
 		set -e; \
 		if [ ! -f "$(ROOTFS_DIR)/lib/os-release" ]; then \
-			if [ ! -f "$(BUILDROOT_DIR)/.config" ]; then \
-				lowercase_string=$(shell echo $(CHIP) | tr '[:upper:]' '[:lower:]'); \
-				$(MAKE_ARCH) -C $(BUILDROOT_DIR) $${lowercase_string}_defconfig; \
-			fi; \
 			$(MAKE_ARCH) -C $(BUILDROOT_DIR); \
 			$(eval BUILD_IMAGE := $(BUILDROOT_DIR)/output/images) \
 			if [ -f "$(BUILD_IMAGE)/rootfs.tar" ]; then \
@@ -515,6 +507,22 @@ buildroot:
 		else \
 			$(ECHO) $(COLOR_YELLOW)"Buildroot has been compiled."$(COLOR_ORIGIN); \
 		fi; \
+	fi
+
+load_bconfig: check
+	$(eval lowercase := $(shell echo $(CHIP) | tr '[:upper:]' '[:lower:]'))
+	$(eval br_defconfig := $(lowercase)_defconfig)
+	@if [ -f "$(BUILDROOT_DIR)/.config" ]; then \
+		set -e; \
+		if grep -q $(br_defconfig) $(BUILDROOT_DIR)/.config; then \
+			$(ECHO) $(COLOR_YELLOW)"using $(br_defconfig)"$(COLOR_ORIGIN); \
+		else \
+			$(ECHO) $(COLOR_RED)"reload $(br_defconfig)"$(COLOR_ORIGIN); \
+			rm -rf $(BUILDROOT_DIR)/output; \
+			$(MAKE_ARCH) -C $(BUILDROOT_DIR) $(br_defconfig); \
+		fi; \
+	else \
+		$(MAKE_ARCH) -C $(BUILDROOT_DIR) $(br_defconfig); \
 	fi
 
 kconfig:
