@@ -279,7 +279,7 @@ list_config()
 		$ECHO $COLOR_YELLOW"[6] TFTP server"$COLOR_ORIGIN
 		$ECHO $COLOR_YELLOW"[8] 8-bit NAND"$COLOR_ORIGIN
 		read sel
-	elif [ "$board" = "2" -o "$board" = "3" -o "$board" = "4" ]; then
+	elif [ "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" ]; then
 		$ECHO $COLOR_YELLOW"[1] eMMC"$COLOR_ORIGIN
 		$ECHO $COLOR_YELLOW"[2] SD Card"$COLOR_ORIGIN
 		read sel
@@ -288,7 +288,7 @@ list_config()
 		fi
 	fi
 
-	if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" ]; then
+	if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" ]; then
 		case "$sel" in
 		"1")
 			bootdev=emmc
@@ -573,8 +573,9 @@ list_config()
 $ECHO $COLOR_GREEN"Select boards:"$COLOR_ORIGIN
 $ECHO $COLOR_YELLOW"[1] SP7350 Ev Board"$COLOR_ORIGIN
 $ECHO $COLOR_YELLOW"[2] SP7350 IO Board"$COLOR_ORIGIN
-$ECHO $COLOR_YELLOW"[3] SP7350 Dual Ev Board"$COLOR_ORIGIN
-$ECHO $COLOR_YELLOW"[4] SP7350 XINK Board"$COLOR_ORIGIN
+$ECHO $COLOR_YELLOW"[3] SP7350 MC Board"$COLOR_ORIGIN
+$ECHO $COLOR_YELLOW"[4] SP7350 Dual Ev Board"$COLOR_ORIGIN
+$ECHO $COLOR_YELLOW"[5] SP7350 XINK Board"$COLOR_ORIGIN
 #$ECHO $COLOR_YELLOW"[9] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
 read board
 
@@ -589,8 +590,12 @@ elif [ "$board" = "2" ]; then
 elif [ "$board" = "3" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
-	echo "LINUX_DTB=sunplus/sp7350-dev" >> $BUILD_CONFIG
+	echo "LINUX_DTB=sunplus/sp7350-mc" >> $BUILD_CONFIG
 elif [ "$board" = "4" ]; then
+	ARCH=arm64
+	echo "CHIP=SP7350" > $BUILD_CONFIG
+	echo "LINUX_DTB=sunplus/sp7350-dev" >> $BUILD_CONFIG
+elif [ "$board" = "5" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-xink" >> $BUILD_CONFIG
@@ -623,7 +628,7 @@ list_config
 
 set_config_directly=0
 
-if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "9" ]; then
+if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" -o "$board" = "9" ]; then
 	## board = SP7350
 	$ECHO $COLOR_GREEN"Select secure modes:"$COLOR_ORIGIN
 	$ECHO $COLOR_YELLOW"[1] No secure (default)"$COLOR_ORIGIN
@@ -647,8 +652,10 @@ if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$b
 	elif [ "$board" = "2" ]; then
 		sel_board=dm
 	elif [ "$board" = "3" ]; then
-		sel_board=dev
+		sel_board=mc
 	elif [ "$board" = "4" ]; then
+		sel_board=dev
+	elif [ "$board" = "5" ]; then
 		sel_board=xink
 	elif [ "$board" = "9" ]; then
 		sel_board=zebu
