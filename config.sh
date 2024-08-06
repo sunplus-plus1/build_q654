@@ -545,7 +545,7 @@ list_config()
 				exit 1
 			fi
 
-			if [ "$bootdev" = "emmc" ] && [ "$rootfs_content" == "BUILDROOT" ]; then
+			if [ "$bootdev" = "emmc" ] && [ "$rootfs_content" != "BUSYBOX" ]; then
                 $ECHO $COLOR_GREEN"Use OVERLAYFS:"$COLOR_ORIGIN
                 $ECHO $COLOR_YELLOW"[1] YES"$COLOR_ORIGIN
                 $ECHO $COLOR_YELLOW"[2] NO"$COLOR_ORIGIN
