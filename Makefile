@@ -548,6 +548,7 @@ headers:
 	mkdir -p linux-headers-$(KERNELRELEASE)
 	cp -f $(LINUX_PATH)/.config linux-headers-$(KERNELRELEASE)
 	cp -f $(LINUX_PATH)/Module.symvers linux-headers-$(KERNELRELEASE)
+	cp -f $(LINUX_PATH)/Makefile linux-headers-$(KERNELRELEASE)
 	$(MAKE_ARCH) $(MAKE_JOBS) -C $(LINUX_PATH) CROSS_COMPILE=$(CROSS_COMPILE_FOR_LINUX) mrproper
 	$(MAKE_ARCH) $(MAKE_JOBS) -C $(LINUX_PATH) O=../../linux-headers-$(KERNELRELEASE) CROSS_COMPILE=$(CROSS_COMPILE_FOR_LINUX) modules_prepare
 	$(MAKE_ARCH) $(MAKE_JOBS) -C $(LINUX_PATH) headers_install INSTALL_HDR_PATH=../../linux-headers-$(KERNELRELEASE) CROSS_COMPILE=$(CROSS_COMPILE_FOR_LINUX)
