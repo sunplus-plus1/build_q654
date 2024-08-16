@@ -630,15 +630,12 @@ set_config_directly=0
 
 if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" -o "$board" = "9" ]; then
 	## board = SP7350
-	$ECHO $COLOR_GREEN"Select secure modes:"$COLOR_ORIGIN
-	$ECHO $COLOR_YELLOW"[1] No secure (default)"$COLOR_ORIGIN
-	$ECHO $COLOR_YELLOW"[2] Enable digital signature"$COLOR_ORIGIN
-	$ECHO $COLOR_YELLOW"[3] Enable digital signature & Encryption"$COLOR_ORIGIN
+	$ECHO $COLOR_GREEN"Select boot modes:"$COLOR_ORIGIN
+	$ECHO $COLOR_YELLOW"[1] Normal boot"$COLOR_ORIGIN
+	$ECHO $COLOR_YELLOW"[2] Secure boot"$COLOR_ORIGIN
 	read secure
 
 	if [ "$secure" = "2" ]; then
-		echo "SECURE=1" >> $BUILD_CONFIG
-	elif [ "$secure" = "3" ]; then
 		echo "SECURE=1" >> $BUILD_CONFIG
 		echo "ENCRYPTION=1" >> $BUILD_CONFIG
 	fi
