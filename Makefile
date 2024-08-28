@@ -299,7 +299,7 @@ spirom_isp: check tool_isp
 		$(ECHO) $(COLOR_YELLOW) $(FIP_PATH)/build/$(FIP_BIN)" doesn't exist."$(COLOR_ORIGIN); \
 		exit 1; \
 	fi
-	@cd out/; ./$(NOR_ISP_SHELL) $(CHIP) $(FLASH_SIZE)
+	@cd out/; OVERLAYFS=$(OVERLAYFS) ./$(NOR_ISP_SHELL) $(CHIP) $(FLASH_SIZE)
 	@$(RM) -f $(OUT_PATH)/$(XBOOT_BIN)
 	@$(RM) -f $(OUT_PATH)/$(UBOOT_BIN)
 
