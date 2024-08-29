@@ -302,6 +302,7 @@ spirom_isp: check tool_isp
 	@cd out/; OVERLAYFS=$(OVERLAYFS) ./$(NOR_ISP_SHELL) $(CHIP) $(FLASH_SIZE)
 	@$(RM) -f $(OUT_PATH)/$(XBOOT_BIN)
 	@$(RM) -f $(OUT_PATH)/$(UBOOT_BIN)
+	@$(RM) -f $(OUT_PATH)/$(FIP_BIN)
 
 spirom: check
 	@if [ $(BOOT_KERNEL_FROM_TFTP) -eq 1 ]; then \
