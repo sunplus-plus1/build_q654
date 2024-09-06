@@ -41,6 +41,7 @@ XBOOT_PATH = boot/xboot
 UBOOT_PATH = boot/uboot
 LINUX_PATH = linux/kernel
 ROOTFS_PATH = linux/rootfs
+APP_PATH ?= 
 FIRMWARE_PATH = firmware/arduino_core_sunplus
 IPACK_PATH = ipack
 OUT_PATH = out
@@ -57,6 +58,7 @@ DTB = dtb
 VMLINUX = vmlinux
 ROOTFS_DIR = $(ROOTFS_PATH)/initramfs/disk
 BUILDROOT_DIR = $(ROOTFS_PATH)/initramfs/buildroot
+YOCTO_DIR = $(ROOTFS_PATH)/initramfs/yocto
 ROOTFS_IMG = rootfs.img
 FREERTOS_IMG = freertos.img
 
@@ -99,7 +101,7 @@ SECURE_PATH ?=
 OVERLAYFS ?= 0
 
 .PHONY: all buildroot xboot uboot kenel rom clean distclean config init check rootfs info firmware freertos toolchain
-.PHONY: dtb spirom isp tool_isp kconfig uconfig xconfig bconfig load_bconfig
+.PHONY: dtb spirom isp tool_isp kconfig uconfig xconfig bconfig load_bconfig yocto
 
 # rootfs image is created by :
 # make initramfs -> re-create initial disk/
@@ -108,7 +110,11 @@ OVERLAYFS ?= 0
 # or use buildroot to create 
 
 all: check
-	@$(MAKE) buildroot
+	@if [ "$(ROOTFS_CONTENT)" = "YOCTO" ]; then \
+		$(MAKE) yocto; \
+	elif [ "$(ROOTFS_CONTENT)" = "BUILDROOT" ]; then \
+		$(MAKE) buildroot; \
+	fi
 	@$(MAKE) xboot
 	@$(MAKE) dtb
 	@$(MAKE) uboot
@@ -121,6 +127,7 @@ all: check
 	@if [ "$(BOOT_FROM)" != "SPINOR" ]; then \
 		$(MAKE) rootfs ; \
 	fi
+	@$(MAKE) application
 	@$(MAKE) rom
 
 firmware:
@@ -229,6 +236,7 @@ distclean: clean
 	@$(RM) -f $(CONFIG_ROOT)
 	@$(RM) -f $(HW_CONFIG_ROOT)
 	@$(MAKE) -C $(BUILDROOT_DIR) clean
+	@$(MAKE) -C $(YOCTO_DIR) cleanall
 
 __config: clean
 	@if [ -z $(HCONFIG) ]; then \
@@ -456,6 +464,21 @@ rom: check
 		fi; \
 	fi
 
+application: check
+	@if [ -d "$(APP_PATH)" ]; then  \
+		set -e; \
+		$(MAKE_ARCH) -C $(APP_PATH) clean; \
+		$(MAKE_ARCH) $(MAKE_JOBS) -C $(APP_PATH) all CROSS_COMPILE=$(CROSS_COMPILE_FOR_LINUX); \
+		if [ $$? -ne 0 ]; then \
+			exit 1; \
+		fi; \
+		if [ -d $(ROOTFS_DIR) ]; then \
+			$(MAKE_ARCH) -C $(APP_PATH) install ROOTFS_DIR=$(TOPDIR)/$(ROOTFS_DIR); \
+		else \
+			$(ECHO) $(COLOR_RED)"$(ROOTFS_DIR) not exist"$(COLOR_ORIGIN); \
+		fi; \
+	fi
+
 mt: check
 	@$(MAKE) kernel
 	cp linux/application/module_test/mt2.sh $(ROOTFS_DIR)/bin
@@ -474,6 +497,7 @@ check:
 		$(ECHO) $(COLOR_YELLOW)"Please \"make config\" first."$(COLOR_ORIGIN); \
 		exit 1; \
 	fi
+	$(eval chip_lowercase := $(shell echo $(CHIP) | tr '[:upper:]' '[:lower:]'))
 
 initramfs:
 	@$(MAKE_ARCH) -C $(ROOTFS_PATH) CROSS=$(CROSS_COMPILE_FOR_ROOTFS) initramfs OVERLAYFS=$(OVERLAYFS) rootfs_cfg=$(ROOTFS_CONFIG) boot_from=$(BOOT_FROM) ROOTFS_CONTENT=$(ROOTFS_CONTENT)
@@ -510,9 +534,22 @@ buildroot: load_bconfig
 		fi; \
 	fi
 
+yocto: check
+	@if [ "$(ROOTFS_CONTENT)" = "YOCTO" ]; then \
+		set -e; \
+		$(MAKE_ARCH) -C $(YOCTO_DIR) MACHINE=$(chip_lowercase) BOARDNAME=$(BOARDNAME) clean; \
+		$(MAKE_ARCH) -C $(YOCTO_DIR) MACHINE=$(chip_lowercase) BOARDNAME=$(BOARDNAME); \
+		if [ $$? -ne 0 ]; then \
+			$(ECHO) $(COLOR_RED)"Compile Yocto failed"$(COLOR_ORIGIN); \
+			exit 1; \
+		fi; \
+		mkdir -p ${YOCTO_DIR}/../disk/lib/firmware; \
+	else \
+		$(ECHO) $(COLOR_YELLOW)"Please select Yocto rootfs."$(COLOR_ORIGIN); \
+	fi
+
 load_bconfig: check
-	$(eval lowercase := $(shell echo $(CHIP) | tr '[:upper:]' '[:lower:]'))
-	$(eval br_defconfig := $(lowercase)_defconfig)
+	$(eval br_defconfig := $(chip_lowercase)_defconfig)
 	@if [ -f "$(BUILDROOT_DIR)/.config" ]; then \
 		set -e; \
 		if grep -q $(br_defconfig) $(BUILDROOT_DIR)/.config; then \
