@@ -582,27 +582,27 @@ read board
 if [ "$board" = "1" -o "$board" = "9" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
-	echo "BOARDNAME=ev" > $BUILD_CONFIG
+	echo "BOARDNAME=ev" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-ev" >> $BUILD_CONFIG
 elif [ "$board" = "2" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
-	echo "BOARDNAME=dm" > $BUILD_CONFIG
+	echo "BOARDNAME=dm" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-dm" >> $BUILD_CONFIG
 elif [ "$board" = "3" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
-	echo "BOARDNAME=mc" > $BUILD_CONFIG
+	echo "BOARDNAME=mc" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-mc" >> $BUILD_CONFIG
 elif [ "$board" = "4" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
-	echo "BOARDNAME=dev" > $BUILD_CONFIG
+	echo "BOARDNAME=dev" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-dev" >> $BUILD_CONFIG
 elif [ "$board" = "5" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
-	echo "BOARDNAME=xink" > $BUILD_CONFIG
+	echo "BOARDNAME=xink" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-xink" >> $BUILD_CONFIG
 else
 	echo "Error: Unknown board!"
