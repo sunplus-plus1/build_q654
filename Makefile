@@ -110,7 +110,7 @@ OVERLAYFS ?= 0
 # or use buildroot to create 
 
 all: check
-	@if [ "$(ROOTFS_CONTENT)" = "YOCTO" ]; then \
+	@if [ "$(shell echo $(ROOTFS_CONTENT) | cut -c1-5)" = "YOCTO" ]; then \
 		$(MAKE) yocto; \
 	elif [ "$(ROOTFS_CONTENT)" = "BUILDROOT" ]; then \
 		$(MAKE) buildroot; \
@@ -535,7 +535,7 @@ buildroot: load_bconfig
 	fi
 
 yocto: check
-	@if [ "$(ROOTFS_CONTENT)" = "YOCTO" ]; then \
+	@if [ "$(ROOTFS_CONTENT)" = "YOCTO424" ]; then \
 		set -e; \
 		$(MAKE_ARCH) -C $(YOCTO_DIR) MACHINE=$(chip_lowercase) BOARDNAME=$(BOARDNAME) clean; \
 		$(MAKE_ARCH) -C $(YOCTO_DIR) MACHINE=$(chip_lowercase) BOARDNAME=$(BOARDNAME); \
@@ -544,6 +544,16 @@ yocto: check
 			exit 1; \
 		fi; \
 		mkdir -p ${YOCTO_DIR}/../disk/lib/firmware; \
+	elif [ "$(ROOTFS_CONTENT)" = "YOCTO302" ]; then \
+		cd $(ROOTFS_DIR)/../; \
+		rm -rf disk; \
+		tar jxvf rootfs.tar.bz2; \
+		echo "${chip_lowercase}-$(BOARDNAME)" > disk/etc/hostname; \
+		echo "Yocto build 3.0.2-$(shell date +'%Y%m%d')\n" > disk/etc/issue; \
+		sed -i 's/^ID="[^"]*"/ID="$(CHIP)"/' disk/usr/lib/os-release; \
+		sed -i 's/^NAME="[^"]*"/NAME="$(CHIP) $(shell echo $(BOARDNAME) | tr a-z A-Z) board"/' disk/usr/lib/os-release; \
+		sed -i 's/^PRETTY_NAME="[^"]*"/PRETTY_NAME="$(CHIP) $(shell echo $(BOARDNAME) | tr a-z A-Z) board 3.0-20200622 (zeus)"/' disk/usr/lib/os-release; \
+		mkdir -p disk/lib/firmware; \
 	else \
 		$(ECHO) $(COLOR_YELLOW)"Please select Yocto rootfs."$(COLOR_ORIGIN); \
 	fi
