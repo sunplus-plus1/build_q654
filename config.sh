@@ -1,7 +1,7 @@
 #!/bin/bash
-COLOR_RED="\033[0;1;31;40m"
-COLOR_GREEN="\033[0;1;32;40m"
-COLOR_YELLOW="\033[0;1;33;40m"
+COLOR_RED="\033[0;1;31m"
+COLOR_GREEN="\033[0;1;32m"
+COLOR_YELLOW="\033[0;1;33m"
 COLOR_ORIGIN="\033[0m"
 ECHO="echo -e"
 BUILD_CONFIG=./.config
@@ -271,17 +271,17 @@ list_config()
 {
 	sel=1
 	if [ "$board" = "1" ]; then
-		$ECHO $COLOR_YELLOW"[1] eMMC"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[2] SPI-NAND"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[3] SPI-NOR (jffs2)"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[4] NOR/Romter (initramfs)"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[5] SD Card"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[6] TFTP server"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[8] 8-bit NAND"$COLOR_ORIGIN
+		$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
+		$ECHO $COLOR_ORIGIN"[2] SPI-NAND"$COLOR_ORIGIN
+		$ECHO $COLOR_ORIGIN"[3] SPI-NOR (jffs2)"$COLOR_ORIGIN
+		$ECHO $COLOR_ORIGIN"[4] NOR/Romter (initramfs)"$COLOR_ORIGIN
+		$ECHO $COLOR_ORIGIN"[5] SD Card"$COLOR_ORIGIN
+		$ECHO $COLOR_ORIGIN"[6] TFTP server"$COLOR_ORIGIN
+		$ECHO $COLOR_ORIGIN"[8] 8-bit NAND"$COLOR_ORIGIN
 		read sel
 	elif [ "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" ]; then
-		$ECHO $COLOR_YELLOW"[1] eMMC"$COLOR_ORIGIN
-		$ECHO $COLOR_YELLOW"[2] SD Card"$COLOR_ORIGIN
+		$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
+		$ECHO $COLOR_ORIGIN"[2] SD Card"$COLOR_ORIGIN
 		read sel
 		if [ "$sel" == "2" ]; then
 			sel=5
@@ -322,9 +322,9 @@ list_config()
 
 		if [ "$bootdev" = "nor" -o "$bootdev" = "spi_nor" ]; then
 			$ECHO $COLOR_GREEN"Select SPI-NOR size:"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[1] 16 MiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[2] 32 MiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[3] 64 MiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[1] 16 MiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[2] 32 MiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[3] 64 MiB"$COLOR_ORIGIN
 			read sel
 			case "$sel" in
 			"1")
@@ -344,12 +344,12 @@ list_config()
 
 		if [ "$bootdev" = "emmc" ]; then
 			$ECHO $COLOR_GREEN"Select eMMC size:"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[1] 1 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[2] 2 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[3] 4 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[4] 8 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[5] 16 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[6] 32 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[1] 1 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[2] 2 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[3] 4 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[4] 8 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[5] 16 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[6] 32 GiB"$COLOR_ORIGIN
 			read sel
 			case "$sel" in
 			"1")
@@ -379,11 +379,11 @@ list_config()
 		echo "PNAND_FLASH=0" >> $BUILD_CONFIG
 		if [ "$bootdev" = "spi_nand" ]; then
 			$ECHO $COLOR_GREEN"Select NAND size:"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[1] 128 MiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[2] 256 MiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[3] 512 MiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[4] 1 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[5] 2 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[1] 128 MiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[2] 256 MiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[3] 512 MiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[4] 1 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[5] 2 GiB"$COLOR_ORIGIN
 			read sel
 			case "$sel" in
 			"1")
@@ -407,8 +407,8 @@ list_config()
 			esac
 
 			$ECHO $COLOR_GREEN"Select NAND page size:"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[1] 2 KiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[2] 4 KiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[1] 2 KiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[2] 4 KiB"$COLOR_ORIGIN
 			read sel
 			case "$sel" in
 			"1")
@@ -426,9 +426,9 @@ list_config()
 
 			$ECHO $COLOR_GREEN"Select NAND page count per block:"$COLOR_ORIGIN
 			BLOCK_SIZE=$(($NAND_PAGE_SIZE*64))
-			$ECHO $COLOR_YELLOW"[1] 64 (block size = $BLOCK_SIZE KiB)"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[1] 64 (block size = $BLOCK_SIZE KiB)"$COLOR_ORIGIN
 			BLOCK_SIZE=$(($NAND_PAGE_SIZE*128))
-			$ECHO $COLOR_YELLOW"[2] 128 (block size = $BLOCK_SIZE KiB)"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[2] 128 (block size = $BLOCK_SIZE KiB)"$COLOR_ORIGIN
 			read sel
 			case "$sel" in
 			"1")
@@ -443,12 +443,12 @@ list_config()
 			esac
 		elif [ "$bootdev" = "para_nand" ]; then
 			$ECHO $COLOR_GREEN"Select NAND size:"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[1] 128 MiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[2] 256 MiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[3] 512 MiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[4] 1 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[5] 2 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[6] 4 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[1] 128 MiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[2] 256 MiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[3] 512 MiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[4] 1 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[5] 2 GiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[6] 4 GiB"$COLOR_ORIGIN
 			read sel
 			case "$sel" in
 			"1")
@@ -475,9 +475,9 @@ list_config()
 			esac
 
 			$ECHO $COLOR_GREEN"Select NAND page size:"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[1] 2 KiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[2] 4 KiB"$COLOR_ORIGIN
-			$ECHO $COLOR_YELLOW"[3] 8 KiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[1] 2 KiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[2] 4 KiB"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[3] 8 KiB"$COLOR_ORIGIN
 			read sel
 			case "$sel" in
 			"1")
@@ -499,9 +499,9 @@ list_config()
 
 			$ECHO $COLOR_GREEN"Select NAND page count per block:"$COLOR_ORIGIN
 			BLOCK_SIZE=$(($NAND_PAGE_SIZE*64))
-			$ECHO $COLOR_YELLOW"[1] 64 (block size = $BLOCK_SIZE KiB)"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[1] 64 (block size = $BLOCK_SIZE KiB)"$COLOR_ORIGIN
 			BLOCK_SIZE=$(($NAND_PAGE_SIZE*128))
-			$ECHO $COLOR_YELLOW"[2] 128 (block size = $BLOCK_SIZE KiB)"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[2] 128 (block size = $BLOCK_SIZE KiB)"$COLOR_ORIGIN
 			read sel
 			case "$sel" in
 			"1")
@@ -534,7 +534,7 @@ list_config()
 			$ECHO ${COLOR_GREEN}"Select rootfs:"$COLOR_ORIGIN
 			for n in $(seq -s ' ' $MENU_ROOTFS_NUM)
 			do
-				$ECHO $COLOR_YELLOW"[$idx] $(menu_rootfs_title $n)"$COLOR_ORIGIN
+				$ECHO $COLOR_ORIGIN"[$idx] $(menu_rootfs_title $n)"$COLOR_ORIGIN
 				idx=$((idx + 1))
 			done
 
@@ -547,8 +547,8 @@ list_config()
 
 			if [ "$bootdev" = "emmc" ]; then
                 $ECHO $COLOR_GREEN"Use OVERLAYFS:"$COLOR_ORIGIN
-                $ECHO $COLOR_YELLOW"[1] YES"$COLOR_ORIGIN
-                $ECHO $COLOR_YELLOW"[2] NO"$COLOR_ORIGIN
+                $ECHO $COLOR_ORIGIN"[1] YES"$COLOR_ORIGIN
+                $ECHO $COLOR_ORIGIN"[2] NO"$COLOR_ORIGIN
                 read overlay
                 case "$overlay" in
                 "1")
@@ -571,12 +571,12 @@ list_config()
 }
 
 $ECHO $COLOR_GREEN"Select boards:"$COLOR_ORIGIN
-$ECHO $COLOR_YELLOW"[1] SP7350 Ev Board"$COLOR_ORIGIN
-$ECHO $COLOR_YELLOW"[2] SP7350 IO Board"$COLOR_ORIGIN
-$ECHO $COLOR_YELLOW"[3] SP7350 MC Board"$COLOR_ORIGIN
-$ECHO $COLOR_YELLOW"[4] SP7350 Dual Ev Board"$COLOR_ORIGIN
-$ECHO $COLOR_YELLOW"[5] SP7350 XINK Board"$COLOR_ORIGIN
-#$ECHO $COLOR_YELLOW"[9] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[1] SP7350 Ev Board"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[2] SP7350 IO Board"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[3] SP7350 MC Board"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[4] SP7350 Dual Ev Board"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[5] SP7350 XINK Board"$COLOR_ORIGIN
+#$ECHO $COLOR_ORIGIN"[9] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
 read board
 
 if [ "$board" = "1" -o "$board" = "9" ]; then
@@ -636,8 +636,8 @@ set_config_directly=0
 if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" -o "$board" = "9" ]; then
 	## board = SP7350
 	$ECHO $COLOR_GREEN"Select boot modes:"$COLOR_ORIGIN
-	$ECHO $COLOR_YELLOW"[1] Normal boot"$COLOR_ORIGIN
-	$ECHO $COLOR_YELLOW"[2] Secure boot"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[1] Normal boot"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[2] Secure boot"$COLOR_ORIGIN
 	read secure
 
 	if [ "$secure" = "2" ]; then
