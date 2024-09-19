@@ -517,11 +517,52 @@ list_config()
 		fi
 
 		if [ "$bootdev" = "emmc" -o "$bootdev" = "usb" -o "$bootdev" = "sdcard"  ]; then
-			menu='linux/rootfs/tools/menu.sh'
-			if [ ! -f "$menu" ]; then
-				echo "Error: $menu not found!"
-				exit 1
+            
+            prebuild_info_path="linux/rootfs/initramfs/ubuntu/ubuntu_prebuild.info"
+
+            UBUNTU_PREBUILD_URL="172.18.12.63"
+            ubuntu_prebuild=`wget --connect-timeout=5 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
+            if [ "$?" != "0" ]; then 
+                UBUNTU_PREBUILD_URL="plus1.sunplus.com"
+                ubuntu_prebuild=`wget --connect-timeout=5 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
+				if [ "$?" != "0" ]; then
+					$ECHO $COLOR_RED"get ubuntu_prebuild.txt failed!"$COLOR_ORIGIN
+					exit 1
+				fi
 			fi
+
+            if [ -f "$prebuild_info_path" ]; then
+                buffer=$(cat $prebuild_info_path)
+            fi
+
+            if [ "$ubuntu_prebuild" != "$buffer" ]; then
+                step=0
+                ubuntu_name=""
+                while IFS= read -r line; do
+                    if [ "${line:0:4}" = "DATE" ]; then
+                        continue
+                    elif [[ (! -d "linux/rootfs/initramfs/ubuntu/$line") && ("$step" = "0") ]] ; then
+                        ubuntu_name="$line"
+                        mkdir -p linux/rootfs/initramfs/ubuntu/"$line"
+                        step=1
+                    elif [ "$line" = "--END--" ]; then
+                        step=0
+                        continue
+                    elif [ "$step" = "1" ]; then
+                        if [ ! -f "linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config" ]; then
+                            echo -ne "" > linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config
+                        fi
+                        echo "$line" >> linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config
+                    fi
+                done <<< $ubuntu_prebuild
+                echo -e "$ubuntu_prebuild" > $prebuild_info_path
+            fi
+
+            menu='linux/rootfs/tools/menu.sh'
+            if [ ! -f "$menu" ]; then
+                echo "Error: $menu not found!"
+                exit 1
+            fi
 
 			. $menu
 			menu_rootfs_title_num
@@ -544,6 +585,10 @@ list_config()
 				echo "Error: Unknown config!"
 				exit 1
 			fi
+			
+            if [ "${rootfs_content%%:*}" = "UBUNTU" ]; then
+                UBUNTU_PREBUILD_URL=$UBUNTU_PREBUILD_URL ROOTFS=$rootfs_content build/dlubuntu.sh 
+            fi
 
 			if [ "$bootdev" = "emmc" ]; then
                 $ECHO $COLOR_GREEN"Use OVERLAYFS:"$COLOR_ORIGIN
