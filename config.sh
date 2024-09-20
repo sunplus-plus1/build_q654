@@ -521,12 +521,12 @@ list_config()
             prebuild_info_path="linux/rootfs/initramfs/ubuntu/ubuntu_prebuild.info"
 
             UBUNTU_PREBUILD_URL="172.18.12.63"
-            ubuntu_prebuild=`wget --connect-timeout=5 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
-            if [ "$?" != "0" ]; then 
+            ubuntu_prebuild=`wget --connect-timeout=5 --tries=1 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
+            if [ "$ubuntu_prebuild" = "" ]; then 
                 UBUNTU_PREBUILD_URL="plus1.sunplus.com"
-                ubuntu_prebuild=`wget --connect-timeout=5 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
-				if [ "$?" != "0" ]; then
-					$ECHO $COLOR_RED"get ubuntu_prebuild.txt failed!"$COLOR_ORIGIN
+                ubuntu_prebuild=`wget --connect-timeout=5 --tries=1 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
+				if [ "$ubuntu_prebuild" = "" ]; then
+					$ECHO $COLOR_RED"get ubuntu_prebuild info failed!"$COLOR_ORIGIN
 					exit 1
 				fi
 			fi
