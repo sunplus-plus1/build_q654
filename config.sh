@@ -538,7 +538,7 @@ list_config()
             if [ "$ubuntu_prebuild" != "$buffer" ]; then
                 step=0
                 ubuntu_name=""
-                while IFS= read -r line; do
+                echo "$ubuntu_prebuild" | while IFS= read -r line; do
                     if [ "${line:0:4}" = "DATE" ]; then
                         continue
                     elif [[ (! -d "linux/rootfs/initramfs/ubuntu/$line") && ("$step" = "0") ]] ; then
@@ -554,7 +554,7 @@ list_config()
                         fi
                         echo "$line" >> linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config
                     fi
-                done <<< $ubuntu_prebuild
+                done
                 echo -e "$ubuntu_prebuild" > $prebuild_info_path
             fi
 
@@ -732,3 +732,4 @@ echo "ARCH=$ARCH" >> $BUILD_CONFIG
 echo "bootdev "$bootdev
 
 c_chip_config $bootdev
+
