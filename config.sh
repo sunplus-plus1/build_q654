@@ -519,9 +519,13 @@ list_config()
 		if [ "$bootdev" = "emmc" -o "$bootdev" = "usb" -o "$bootdev" = "sdcard"  ]; then
             
             prebuild_info_path="linux/rootfs/initramfs/ubuntu/ubuntu_prebuild.info"
+			ubuntu_prebuild=""
 
-            UBUNTU_PREBUILD_URL="172.18.12.63"
-            ubuntu_prebuild=`wget --connect-timeout=5 --tries=1 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
+			if [ "$ubuntu_prebuild" = "" ]; then 
+            	UBUNTU_PREBUILD_URL="172.18.12.63"
+            	ubuntu_prebuild=`wget --connect-timeout=5 --tries=1 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
+			fi
+			
             if [ "$ubuntu_prebuild" = "" ]; then 
                 UBUNTU_PREBUILD_URL="plus1.sunplus.com"
                 ubuntu_prebuild=`wget --connect-timeout=5 --tries=1 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
@@ -532,31 +536,33 @@ list_config()
 			fi
 
             if [ -f "$prebuild_info_path" ]; then
-                buffer=$(cat $prebuild_info_path)
+                buffer=$(cat $prebuild_info_path)				
             fi
-
-            if [ "$ubuntu_prebuild" != "$buffer" ]; then
-                step=0
-                ubuntu_name=""
-                echo "$ubuntu_prebuild" | while IFS= read -r line; do
-                    if [ "${line:0:4}" = "DATE" ]; then
-                        continue
-                    elif [[ (! -d "linux/rootfs/initramfs/ubuntu/$line") && ("$step" = "0") ]] ; then
-                        ubuntu_name="$line"
-                        mkdir -p linux/rootfs/initramfs/ubuntu/"$line"
-                        step=1
-                    elif [ "$line" = "--END--" ]; then
-                        step=0
-                        continue
-                    elif [ "$step" = "1" ]; then
-                        if [ ! -f "linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config" ]; then
-                            echo -ne "" > linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config
-                        fi
-                        echo "$line" >> linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config
-                    fi
-                done
-                echo -e "$ubuntu_prebuild" > $prebuild_info_path
-            fi
+			
+			step=0
+			ubuntu_name=""
+			echo "$ubuntu_prebuild" | while IFS= read -r line; do
+				if [ "${line:0:4}" = "DATE" ]; then
+					continue
+				elif [ "$line" = "--END--" ]; then
+					step=0
+					continue
+				elif [[ (! -d "linux/rootfs/initramfs/ubuntu/$line") && ("$step" = "0") ]] ; then
+					if [[ "$line" == *"="* ]]; then
+						continue
+					fi
+					ubuntu_name="$line"
+					mkdir -p "linux/rootfs/initramfs/ubuntu/$line"
+					step=1
+				elif [ "$step" = "1" ]; then
+					if [ -d "linux/rootfs/initramfs/ubuntu/$ubuntu_name" ]; then
+						if [ ! -f "linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config" ]; then
+							echo -ne "" > linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config
+						fi
+						echo "$line" >> linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config
+					fi
+				fi
+			done
 
             menu='linux/rootfs/tools/menu.sh'
             if [ ! -f "$menu" ]; then
