@@ -253,7 +253,7 @@ __config: clean
 	@$(MAKE_ARCH) initramfs
 	@$(MKDIR) -p $(OUT_PATH)
 	@$(MAKE) -C $(TOPDIR)/$(BUILD_PATH)/tools/isp clean
-	@$(RM) $(YOCTO_DIR)/bbfile.md5
+	@$(RM) -f $(YOCTO_DIR)/bbfile.md5
 	@$(RM) -f $(TOPDIR)/$(OUT_PATH)/$(ISP_SHELL) $(TOPDIR)/$(OUT_PATH)/$(PART_SHELL) $(TOPDIR)/$(OUT_PATH)/$(NOR_ISP_SHELL)
 	@$(LN) -s $(TOPDIR)/$(BUILD_PATH)/$(ISP_SHELL) $(TOPDIR)/$(OUT_PATH)/$(ISP_SHELL)
 	@$(LN) -s $(TOPDIR)/$(BUILD_PATH)/$(NOR_ISP_SHELL) $(TOPDIR)/$(OUT_PATH)/$(NOR_ISP_SHELL)
