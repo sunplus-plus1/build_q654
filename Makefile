@@ -253,6 +253,7 @@ __config: clean
 	@$(MAKE_ARCH) initramfs
 	@$(MKDIR) -p $(OUT_PATH)
 	@$(MAKE) -C $(TOPDIR)/$(BUILD_PATH)/tools/isp clean
+	@$(RM) $(YOCTO_DIR)/bbfile.md5
 	@$(RM) -f $(TOPDIR)/$(OUT_PATH)/$(ISP_SHELL) $(TOPDIR)/$(OUT_PATH)/$(PART_SHELL) $(TOPDIR)/$(OUT_PATH)/$(NOR_ISP_SHELL)
 	@$(LN) -s $(TOPDIR)/$(BUILD_PATH)/$(ISP_SHELL) $(TOPDIR)/$(OUT_PATH)/$(ISP_SHELL)
 	@$(LN) -s $(TOPDIR)/$(BUILD_PATH)/$(NOR_ISP_SHELL) $(TOPDIR)/$(OUT_PATH)/$(NOR_ISP_SHELL)
@@ -537,13 +538,14 @@ buildroot: load_bconfig
 yocto: check
 	@if [ "$(ROOTFS_CONTENT)" = "YOCTO424" ]; then \
 		set -e; \
-		$(MAKE_ARCH) -C $(YOCTO_DIR) MACHINE=$(chip_lowercase) BOARDNAME=$(BOARDNAME) clean; \
 		$(MAKE_ARCH) -C $(YOCTO_DIR) MACHINE=$(chip_lowercase) BOARDNAME=$(BOARDNAME); \
 		if [ $$? -ne 0 ]; then \
 			$(ECHO) $(COLOR_RED)"Compile Yocto failed"$(COLOR_ORIGIN); \
 			exit 1; \
 		fi; \
-		mkdir -p ${YOCTO_DIR}/../disk/lib/firmware; \
+		cd $(ROOTFS_DIR)/../; \
+		mkdir -p disk/lib/firmware; \
+		cd - > /dev/null; \
 	elif [ "$(ROOTFS_CONTENT)" = "YOCTO302" ]; then \
 		cd $(ROOTFS_DIR)/../; \
 		rm -rf disk; \
