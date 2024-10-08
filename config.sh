@@ -520,11 +520,14 @@ list_config()
             
 			use_ftp=0
 			zone=$(basename `cat /etc/timezone`)
-			echo "timezone = $zone"
+			
 			if [ "$zone" = "Shanghai" ]; then
+				echo "***"
 				use_ftp=1
 				UBUNTU_PREBUILD_URL="ftp.sunmedia.com.cn"
 				ubuntu_prebuild=`wget --no-verbose --connect-timeout=3 --tries=1 -qO- ftp://${UBUNTU_PREBUILD_URL}/ubuntu_prebuild/ubuntu_prebuild.txt | cat`
+			else
+				echo "---"
 			fi
 			
 			if [ "$ubuntu_prebuild" = "" ]; then 
@@ -541,33 +544,7 @@ list_config()
 					exit 1
 				fi
 			fi
-
-			step=0
-			ubuntu_name=""
 			
-			echo "$ubuntu_prebuild" | while IFS= read -r line; do
-				if [ "${line:0:4}" = "DATE" ]; then
-					continue
-				elif [ "$line" = "--END--" ]; then
-					step=0
-					continue
-				elif [[ (! -d "linux/rootfs/initramfs/ubuntu/$line") && ("$step" = "0") ]] ; then
-					if [[ "$line" == *"="* ]]; then
-						continue
-					fi
-					ubuntu_name="$line"
-					mkdir -p "linux/rootfs/initramfs/ubuntu/$line"
-					step=1
-				elif [ "$step" = "1" ]; then
-					if [ -d "linux/rootfs/initramfs/ubuntu/$ubuntu_name" ]; then
-						if [ ! -f "linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config" ]; then
-							echo -ne "" > linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config
-						fi
-						echo "$line" >> linux/rootfs/initramfs/ubuntu/$ubuntu_name/menu.config
-					fi
-				fi
-			done
-
             menu='linux/rootfs/tools/menu.sh'
             if [ ! -f "$menu" ]; then
                 echo "Error: $menu not found!"
@@ -598,6 +575,9 @@ list_config()
 			
             if [ "${rootfs_content%%:*}" = "UBUNTU" ]; then				
                 UBUNTU_PREBUILD_URL=$UBUNTU_PREBUILD_URL ROOTFS=$rootfs_content USE_FTP=$use_ftp build/dlubuntu.sh 
+				if [ "$?" != "0" ]; then
+					exit 1
+				fi
             fi
 
 			if [ "$bootdev" = "emmc" ]; then

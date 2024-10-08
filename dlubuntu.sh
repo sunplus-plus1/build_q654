@@ -61,6 +61,7 @@ cd $UBUNTU_PATH
                 fi
             fi
         fi
+        dos2unix $UBUNTU_ROOTFS_NAME.md5
         md5sum -c $UBUNTU_ROOTFS_NAME.md5
         if [ "$?" != "0" ]; then
             $ECHO $COLOR_RED"$UBUNTU_ROOTFS_NAME md5 error!"$COLOR_ORIGIN
