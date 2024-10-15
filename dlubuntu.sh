@@ -66,6 +66,9 @@ cd $UBUNTU_ROOTFS_PATH
                     exit 1
                 fi
             fi
+            if [ -f "$UBUNTU_ROOTFS_NAME.md5.0" ]; then
+                mv $UBUNTU_ROOTFS_NAME.md5.0 $UBUNTU_ROOTFS_NAME.md5
+            fi
             dos2unix $UBUNTU_ROOTFS_NAME.md5
             md5sum -c $UBUNTU_ROOTFS_NAME.md5
             if [ "$?" != "0" ]; then
@@ -80,5 +83,4 @@ cd $UBUNTU_ROOTFS_PATH
             break
         done
     fi
-    rm -f $UBUNTU_ROOTFS_NAME.md5.0 > /dev/null
 cd - > /dev/null
