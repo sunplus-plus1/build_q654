@@ -10,7 +10,7 @@ UBUNTU_PATH="linux/rootfs/initramfs/ubuntu"
 get_ubuntu_prebuilds()
 {
     if [ "$USE_FTP" == "0" ]; then
-        UBUNTU_PREBUILD_FILES=`wget -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/${UBUNTU_ROOTFS_NAME}.list | cat`
+        UBUNTU_PREBUILD_FILES=`wget -qO- ${URL_PROTOCAL}://${UBUNTU_PREBUILD_URL}/packages/armhf/${UBUNTU_ROOTFS_NAME}.list | cat`
         if [ "$?" != "0" ]; then
             $ECHO $COLOR_RED"get $UBUNTU_ROOTFS_NAME failed!"$COLOR_ORIGIN
             exit 1
@@ -21,7 +21,7 @@ get_ubuntu_prebuilds()
 get_ubuntu_prebuild_md5()
 {
     if [ "$USE_FTP" == "0" ]; then
-        wget -q http://${UBUNTU_PREBUILD_URL}/packages/armhf/${UBUNTU_ROOTFS_NAME}.md5 -O ${UBUNTU_ROOTFS_NAME}.md5.0
+        wget -q ${URL_PROTOCAL}://${UBUNTU_PREBUILD_URL}/packages/armhf/${UBUNTU_ROOTFS_NAME}.md5 -O ${UBUNTU_ROOTFS_NAME}.md5.0
     else
         wget -q ftp://${UBUNTU_PREBUILD_URL}/ubuntu_prebuild/${UBUNTU_ROOTFS_NAME}/${UBUNTU_ROOTFS_NAME}.md5 -O ${UBUNTU_ROOTFS_NAME}.md5.0
     fi
@@ -53,7 +53,7 @@ cd $UBUNTU_ROOTFS_PATH
         do
             if [ "$USE_FTP" == "0" ]; then
                 for file in $UBUNTU_PREBUILD_FILES; do
-                    wget --no-use-server-timestamps -nv http://${UBUNTU_PREBUILD_URL}/packages/armhf/${file} -O ${file}
+                    wget --no-use-server-timestamps -nv ${URL_PROTOCAL}://${UBUNTU_PREBUILD_URL}/packages/armhf/${file} -O ${file}
                     if [ "$?" != "0" ]; then
                         $ECHO $COLOR_RED"get ${file} failed!"$COLOR_ORIGIN
                         exit 1

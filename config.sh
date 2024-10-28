@@ -519,6 +519,7 @@ list_config()
 		if [ "$bootdev" = "emmc" -o "$bootdev" = "usb" -o "$bootdev" = "sdcard"  ]; then
             
 			use_ftp=0
+			url_protocal=http
 			zone=$(basename `cat /etc/timezone`)
 			
 			if [ "$zone" = "Shanghai" ]; then
@@ -538,7 +539,8 @@ list_config()
 			
             if [ "$ubuntu_prebuild" = "" ]; then 
 				UBUNTU_PREBUILD_URL="plus1.sunplus.com"
-				ubuntu_prebuild=`wget --connect-timeout=3 --tries=1 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
+				url_protocal=https
+				ubuntu_prebuild=`wget --connect-timeout=3 --tries=1 -qO- https://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
 				if [ "$ubuntu_prebuild" = "" ]; then
 					$ECHO $COLOR_RED"get ubuntu_prebuild info failed!"$COLOR_ORIGIN
 					exit 1
@@ -574,7 +576,7 @@ list_config()
 			fi
 			
             if [ "${rootfs_content%%:*}" = "UBUNTU" ]; then				
-                UBUNTU_PREBUILD_URL=$UBUNTU_PREBUILD_URL ROOTFS=$rootfs_content USE_FTP=$use_ftp build/dlubuntu.sh 
+                UBUNTU_PREBUILD_URL=$UBUNTU_PREBUILD_URL ROOTFS=$rootfs_content URL_PROTOCAL=$url_protocal USE_FTP=$use_ftp build/dlubuntu.sh 
 				if [ "$?" != "0" ]; then
 					exit 1
 				fi
