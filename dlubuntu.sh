@@ -1,9 +1,6 @@
 #!/bin/bash
 
-COLOR_RED="\033[0;1;31m"
-COLOR_ORIGIN="\033[0m"
-
-ECHO="echo -e"
+source build/dload.sh
 
 UBUNTU_PATH="linux/rootfs/initramfs/ubuntu"
 
@@ -29,26 +26,26 @@ get_ubuntu_prebuild_md5()
         $ECHO $COLOR_RED"get $UBUNTU_ROOTFS_NAME.md5 failed!"$COLOR_ORIGIN
         exit 1
     fi
-    dos2unix $UBUNTU_ROOTFS_NAME.md5.0 2> /dev/null
+    dos2unix_func $UBUNTU_ROOTFS_NAME.md5.0 2> /dev/null
 }
 
-UBUNTU_ROOTFS_NAME=`basename "${ROOTFS#*:}"`
-
-UBUNTU_ROOTFS_PATH="linux/rootfs/initramfs/ubuntu/${UBUNTU_ROOTFS_NAME}"
-
-cd $UBUNTU_ROOTFS_PATH
-
-    get_ubuntu_prebuilds
-    get_ubuntu_prebuild_md5
-
+download_ubuntu_prebuild()
+{
     retry=0
     is_diff=1
 
     if [ -f "${UBUNTU_ROOTFS_NAME}.md5" ]; then
         diff -q ${UBUNTU_ROOTFS_NAME}.md5.0 ${UBUNTU_ROOTFS_NAME}.md5 2> /dev/null
-        if [ "$?" = "0" ]; then is_diff=0; fi
+        if [ "$?" = "0" ]; then 
+            rm -f ${UBUNTU_ROOTFS_NAME}.md5.0
+            is_diff=0
+        else
+            rm ${UBUNTU_ROOTFS_NAME}/ubuntu-*
+        fi
     fi
     if [ "$is_diff" != "0" ]; then
+        echo "Downloading ${UBUNTU_ROOTFS_NAME}"
+
         while true
         do
             if [ "$USE_FTP" == "0" ]; then
@@ -69,9 +66,10 @@ cd $UBUNTU_ROOTFS_PATH
             if [ -f "$UBUNTU_ROOTFS_NAME.md5.0" ]; then
                 mv $UBUNTU_ROOTFS_NAME.md5.0 $UBUNTU_ROOTFS_NAME.md5
             fi
-            dos2unix $UBUNTU_ROOTFS_NAME.md5
+            dos2unix_func $UBUNTU_ROOTFS_NAME.md5
             md5sum -c $UBUNTU_ROOTFS_NAME.md5
             if [ "$?" != "0" ]; then
+                rm -f ${file}
                 retry=$((retry + 1))
                 if [ $retry -ge 2 ]; then
                     $ECHO $COLOR_RED"$UBUNTU_ROOTFS_NAME md5 error!"$COLOR_ORIGIN
@@ -83,4 +81,29 @@ cd $UBUNTU_ROOTFS_PATH
             break
         done
     fi
+}
+
+UBUNTU_ROOTFS_NAME=`basename "${ROOTFS#*:}"`
+
+INITRAMFS="linux/rootfs/initramfs"
+UBUNTU_ROOTFS_PATH="${INITRAMFS}/ubuntu/${UBUNTU_ROOTFS_NAME}"
+
+cd $UBUNTU_ROOTFS_PATH
+
+    md5sum -c $UBUNTU_ROOTFS_NAME.md5 > /dev/null 2>&1
+    if [ "$?" != "0" ]; then
+        rm -f $UBUNTU_ROOTFS_NAME.md5.0
+        get_ubuntu_prebuilds
+        get_ubuntu_prebuild_md5
+        download_ubuntu_prebuild
+    fi
+
 cd - > /dev/null
+
+INITRAMFS="linux/rootfs/initramfs"
+prebuiltversion=$(echo "$ROOTFS" | grep -oP '\d+\.\d+')
+
+WORKPATH="${INITRAMFS}/ubuntu/"
+FILENAME="prebuilt-app-${prebuiltversion}"
+download
+

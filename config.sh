@@ -575,12 +575,17 @@ list_config()
 				exit 1
 			fi
 			
-            if [ "${rootfs_content%%:*}" = "UBUNTU" ]; then				
-                UBUNTU_PREBUILD_URL=$UBUNTU_PREBUILD_URL ROOTFS=$rootfs_content URL_PROTOCAL=$url_protocal USE_FTP=$use_ftp build/dlubuntu.sh 
+			if [ "${rootfs_content%%:*}" = "UBUNTU" ]; then
+				UBUNTU_PREBUILD_URL=$UBUNTU_PREBUILD_URL ROOTFS=$rootfs_content URL_PROTOCAL=$url_protocal USE_FTP=$use_ftp build/dlubuntu.sh
 				if [ "$?" != "0" ]; then
 					exit 1
 				fi
-            fi
+			fi
+
+			UBUNTU_PREBUILD_URL=$UBUNTU_PREBUILD_URL ROOTFS=$rootfs_content URL_PROTOCAL=$url_protocal USE_FTP=$use_ftp build/dlprebuilt.sh
+			if [ "$?" != "0" ]; then
+				exit 1
+			fi
 
 			if [ "$bootdev" = "emmc" ]; then
                 $ECHO $COLOR_GREEN"Use OVERLAYFS:"$COLOR_ORIGIN
