@@ -522,31 +522,37 @@ list_config()
 			url_protocal=http
 			zone=$(basename `cat /etc/timezone`)
 			
-			if [ "$zone" = "Shanghai" ]; then
-				echo "***"
-				use_ftp=1
-				UBUNTU_PREBUILD_URL="ftp.sunmedia.com.cn"
-				ubuntu_prebuild=`wget --no-verbose --connect-timeout=3 --tries=1 -qO- ftp://${UBUNTU_PREBUILD_URL}/ubuntu_prebuild/ubuntu_prebuild.txt | cat`
+			if [ "$UBUNTU_PREBUILD_URL" = "" ]; then
+				if [ "$zone" = "Shanghai" ]; then
+					echo "***"
+					use_ftp=1
+					UBUNTU_PREBUILD_URL="ftp.sunmedia.com.cn"
+					ubuntu_prebuild=`wget --no-verbose --connect-timeout=3 --tries=1 -qO- ftp://${UBUNTU_PREBUILD_URL}/ubuntu_prebuild/ubuntu_prebuild.txt | cat`
+				else
+					echo "---"
+				fi
+				
+				if [ "$ubuntu_prebuild" = "" ]; then 
+					use_ftp=0
+					UBUNTU_PREBUILD_URL="172.18.12.63"
+					ubuntu_prebuild=`wget --connect-timeout=3 --tries=1 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
+				fi
+				
+				if [ "$ubuntu_prebuild" = "" ]; then 
+					UBUNTU_PREBUILD_URL="plus1.sunplus.com"
+					url_protocal=https
+					ubuntu_prebuild=`wget --connect-timeout=3 --tries=1 -qO- https://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
+				fi
 			else
-				echo "---"
-			fi
-			
-			if [ "$ubuntu_prebuild" = "" ]; then 
-				use_ftp=0
-				UBUNTU_PREBUILD_URL="172.18.12.63"
 				ubuntu_prebuild=`wget --connect-timeout=3 --tries=1 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
 			fi
-			
-            if [ "$ubuntu_prebuild" = "" ]; then 
-				UBUNTU_PREBUILD_URL="plus1.sunplus.com"
-				url_protocal=https
-				ubuntu_prebuild=`wget --connect-timeout=3 --tries=1 -qO- https://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
-				if [ "$ubuntu_prebuild" = "" ]; then
-					$ECHO $COLOR_RED"get ubuntu_prebuild info failed!"$COLOR_ORIGIN
-					exit 1
-				fi
+
+			if [ "$ubuntu_prebuild" = "" ]; then
+				$ECHO $COLOR_RED"UBUNTU_PREBUILD_URL=$UBUNTU_PREBUILD_URL"$COLOR_ORIGIN
+				$ECHO $COLOR_RED"get ubuntu_prebuild info failed!"$COLOR_ORIGIN
+				exit 1
 			fi
-			
+
             menu='linux/rootfs/tools/menu.sh'
             if [ ! -f "$menu" ]; then
                 echo "Error: $menu not found!"
