@@ -488,11 +488,11 @@ mt: check
 
 init:
 	@if ! [ -f $(CROSS_COMPILE_FOR_LINUX) ]; then \
-		pwd; \
 		./build/dlgcc.sh; \
 	fi
 	@$(RM) -f $(CONFIG_ROOT)
-	@./build/config.sh
+	@UBUNTU_PREBUILD_URL=$$(/usr/local/bin/sunplus-config-ext prebuild_url 2>/dev/null); \
+	UBUNTU_PREBUILD_URL=$$UBUNTU_PREBUILD_URL ./build/config.sh
 
 check:
 	@if ! [ -f $(CONFIG_ROOT) ]; then \
