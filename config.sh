@@ -279,7 +279,7 @@ list_config()
 		$ECHO $COLOR_ORIGIN"[6] TFTP server"$COLOR_ORIGIN
 		$ECHO $COLOR_ORIGIN"[8] 8-bit NAND"$COLOR_ORIGIN
 		read sel
-	elif [ "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" ]; then
+	elif [ "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" -o "$board" = "6" ]; then
 		$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
 		$ECHO $COLOR_ORIGIN"[2] SD Card"$COLOR_ORIGIN
 		read sel
@@ -288,7 +288,7 @@ list_config()
 		fi
 	fi
 
-	if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" ]; then
+	if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" -o "$board" = "6" ]; then
 		case "$sel" in
 		"1")
 			bootdev=emmc
@@ -624,6 +624,7 @@ $ECHO $COLOR_ORIGIN"[2] SP7350 IO Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[3] SP7350 MC Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[4] SP7350 Dual Ev Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[5] SP7350 XINK Board"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[6] SP7350 SR1 Board"$COLOR_ORIGIN
 #$ECHO $COLOR_ORIGIN"[9] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
 read board
 
@@ -652,6 +653,11 @@ elif [ "$board" = "5" ]; then
 	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "BOARDNAME=xink" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-xink" >> $BUILD_CONFIG
+elif [ "$board" = "6" ]; then
+	ARCH=arm64
+	echo "CHIP=SP7350" > $BUILD_CONFIG
+	echo "BOARDNAME=sr1" >> $BUILD_CONFIG
+	echo "LINUX_DTB=sunplus/sp7350-sr1" >> $BUILD_CONFIG
 else
 	echo "Error: Unknown board!"
 	exit 1
@@ -681,7 +687,7 @@ list_config
 
 set_config_directly=0
 
-if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" -o "$board" = "9" ]; then
+if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" -o "$board" = "6" -o "$board" = "9" ]; then
 	## board = SP7350
 	$ECHO $COLOR_GREEN"Select boot modes:"$COLOR_ORIGIN
 	$ECHO $COLOR_ORIGIN"[1] Normal boot"$COLOR_ORIGIN
@@ -707,6 +713,8 @@ if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$b
 		sel_board=dev
 	elif [ "$board" = "5" ]; then
 		sel_board=xink
+	elif [ "$board" = "6" ]; then
+		sel_board=sr1
 	elif [ "$board" = "9" ]; then
 		sel_board=zebu
 	fi
