@@ -522,6 +522,14 @@ bconfig: load_bconfig
 buildroot: load_bconfig
 	@if [ "$(ROOTFS_CONTENT)" = "BUILDROOT" ]; then \
 		set -e; \
+		if [ -f "$(BUILDROOT_DIR)/.force" ]; then \
+			while read line; do \
+				if [ "$$line" = "" ]; then continue; fi; \
+				$(MAKE_ARCH) -C $(BUILDROOT_DIR) $$line-dirclean; \
+				$(MAKE_ARCH) -C $(BUILDROOT_DIR) $$line-build; \
+			done < $(BUILDROOT_DIR)/.force; \
+			rm $(ROOTFS_DIR)/lib/os-release; \
+		fi; \
 		if [ ! -f "$(ROOTFS_DIR)/lib/os-release" ]; then \
 			$(MAKE_ARCH) -C $(BUILDROOT_DIR); \
 			$(eval BUILD_IMAGE := $(BUILDROOT_DIR)/output/images) \
