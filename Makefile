@@ -525,10 +525,9 @@ buildroot: load_bconfig
 		if [ -f "$(BUILDROOT_DIR)/.force" ]; then \
 			while read line; do \
 				if [ "$$line" = "" ]; then continue; fi; \
-				$(MAKE_ARCH) -C $(BUILDROOT_DIR) $$line-dirclean; \
-				$(MAKE_ARCH) -C $(BUILDROOT_DIR) $$line-build; \
+				$(MAKE_ARCH) -C $(BUILDROOT_DIR) $$line; \
 			done < $(BUILDROOT_DIR)/.force; \
-			rm $(ROOTFS_DIR)/lib/os-release; \
+			rm -f $(ROOTFS_DIR)/lib/os-release; \
 		fi; \
 		if [ ! -f "$(ROOTFS_DIR)/lib/os-release" ]; then \
 			$(MAKE_ARCH) -C $(BUILDROOT_DIR); \
