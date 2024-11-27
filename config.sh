@@ -279,7 +279,7 @@ list_config()
 		$ECHO $COLOR_ORIGIN"[6] TFTP server"$COLOR_ORIGIN
 		$ECHO $COLOR_ORIGIN"[8] 8-bit NAND"$COLOR_ORIGIN
 		read sel
-	elif [ "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" -o "$board" = "6" ]; then
+	else
 		$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
 		$ECHO $COLOR_ORIGIN"[2] SD Card"$COLOR_ORIGIN
 		read sel
@@ -288,7 +288,8 @@ list_config()
 		fi
 	fi
 
-	if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" -o "$board" = "6" ]; then
+	if [ "$board" = "1" ] || [ "$board" = "2" ] || [ "$board" = "3" ] || [ "$board" = "4" ] || [ "$board" = "5" ] || \
+	   [ "$board" = "6" ] || [ "$board" = "7" ]; then
 		case "$sel" in
 		"1")
 			bootdev=emmc
@@ -517,11 +518,10 @@ list_config()
 		fi
 
 		if [ "$bootdev" = "emmc" -o "$bootdev" = "usb" -o "$bootdev" = "sdcard"  ]; then
-            
 			use_ftp=0
 			url_protocal=http
 			zone=$(basename `cat /etc/timezone`)
-			
+
 			if [ "$UBUNTU_PREBUILD_URL" = "" ]; then
 				if [ "$zone" = "Shanghai" ]; then
 					echo "***"
@@ -531,14 +531,14 @@ list_config()
 				else
 					echo "---"
 				fi
-				
-				if [ "$ubuntu_prebuild" = "" ]; then 
+
+				if [ "$ubuntu_prebuild" = "" ]; then
 					use_ftp=0
 					UBUNTU_PREBUILD_URL="172.18.12.63"
 					ubuntu_prebuild=`wget --connect-timeout=3 --tries=1 -qO- http://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
 				fi
-				
-				if [ "$ubuntu_prebuild" = "" ]; then 
+
+				if [ "$ubuntu_prebuild" = "" ]; then
 					UBUNTU_PREBUILD_URL="plus1.sunplus.com"
 					url_protocal=https
 					ubuntu_prebuild=`wget --connect-timeout=3 --tries=1 -qO- https://${UBUNTU_PREBUILD_URL}/packages/armhf/ubuntu_prebuild.txt | cat`
@@ -553,11 +553,11 @@ list_config()
 				exit 1
 			fi
 
-            menu='linux/rootfs/tools/menu.sh'
-            if [ ! -f "$menu" ]; then
-                echo "Error: $menu not found!"
-                exit 1
-            fi
+			menu='linux/rootfs/tools/menu.sh'
+			if [ ! -f "$menu" ]; then
+				echo "Error: $menu not found!"
+				exit 1
+			fi
 
 			. $menu
 			menu_rootfs_title_num
@@ -580,7 +580,7 @@ list_config()
 				echo "Error: Unknown config!"
 				exit 1
 			fi
-			
+
 			if [ "${rootfs_content%%:*}" = "UBUNTU" ]; then
 				UBUNTU_PREBUILD_URL=$UBUNTU_PREBUILD_URL ROOTFS=$rootfs_content URL_PROTOCAL=$url_protocal USE_FTP=$use_ftp build/dlubuntu.sh
 				if [ "$?" != "0" ]; then
@@ -594,20 +594,20 @@ list_config()
 			fi
 
 			if [ "$bootdev" = "emmc" ]; then
-                $ECHO $COLOR_GREEN"Use OVERLAYFS:"$COLOR_ORIGIN
-                $ECHO $COLOR_ORIGIN"[1] YES"$COLOR_ORIGIN
-                $ECHO $COLOR_ORIGIN"[2] NO"$COLOR_ORIGIN
-                read overlay
-                case "$overlay" in
-                "1")
-                    echo "OVERLAYFS=1" >> $BUILD_CONFIG
-                    ;;
-                *)
-                    ;;
-                esac
-            fi
+				$ECHO $COLOR_GREEN"Use OVERLAYFS:"$COLOR_ORIGIN
+				$ECHO $COLOR_ORIGIN"[1] YES"$COLOR_ORIGIN
+				$ECHO $COLOR_ORIGIN"[2] NO"$COLOR_ORIGIN
+				read overlay
+				case "$overlay" in
+				"1")
+					echo "OVERLAYFS=1" >> $BUILD_CONFIG
+					;;
+				*)
+					;;
+				esac
+			fi
 		fi
-	elif [ "$board" = "9" ]; then
+	elif [ "$board" = "19" ]; then
 		zmem=1
 		runzebu=1
 		bootdev=nor
@@ -622,13 +622,14 @@ $ECHO $COLOR_GREEN"Select boards:"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[1] SP7350 Ev Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[2] SP7350 IO Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[3] SP7350 MC Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[4] SP7350 Dual Ev Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[5] SP7350 XINK Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[6] SP7350 SR1 Board"$COLOR_ORIGIN
-#$ECHO $COLOR_ORIGIN"[9] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[4] SP7350 EVK Board"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[5] SP7350 Dual Ev Board"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[6] SP7350 XINK Board"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[7] SP7350 SR1 Board"$COLOR_ORIGIN
+#$ECHO $COLOR_ORIGIN"[19] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
 read board
 
-if [ "$board" = "1" -o "$board" = "9" ]; then
+if [ "$board" = "1" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "BOARDNAME=ev" >> $BUILD_CONFIG
@@ -646,24 +647,34 @@ elif [ "$board" = "3" ]; then
 elif [ "$board" = "4" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
+	echo "BOARDNAME=evk" >> $BUILD_CONFIG
+	echo "LINUX_DTB=sunplus/sp7350-evk" >> $BUILD_CONFIG
+elif [ "$board" = "5" ]; then
+	ARCH=arm64
+	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "BOARDNAME=dev" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-dev" >> $BUILD_CONFIG
-elif [ "$board" = "5" ]; then
+elif [ "$board" = "6" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "BOARDNAME=xink" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-xink" >> $BUILD_CONFIG
-elif [ "$board" = "6" ]; then
+elif [ "$board" = "7" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "BOARDNAME=sr1" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-sr1" >> $BUILD_CONFIG
+elif [ "$board" = "19" ]; then
+	ARCH=arm64
+	echo "CHIP=SP7350" > $BUILD_CONFIG
+	echo "BOARDNAME=ev" >> $BUILD_CONFIG
+	echo "LINUX_DTB=sunplus/sp7350-ev" >> $BUILD_CONFIG
 else
 	echo "Error: Unknown board!"
 	exit 1
 fi
 
-if [ "$board" != "9" ]; then
+if [ "$board" != "19" ]; then
 $ECHO $COLOR_GREEN"Select boot devices:"$COLOR_ORIGIN
 fi
 
@@ -687,37 +698,37 @@ list_config
 
 set_config_directly=0
 
-if [ "$board" = "1" -o "$board" = "2" -o "$board" = "3" -o "$board" = "4" -o "$board" = "5" -o "$board" = "6" -o "$board" = "9" ]; then
-	## board = SP7350
-	$ECHO $COLOR_GREEN"Select boot modes:"$COLOR_ORIGIN
-	$ECHO $COLOR_ORIGIN"[1] Normal boot"$COLOR_ORIGIN
-	$ECHO $COLOR_ORIGIN"[2] Secure boot"$COLOR_ORIGIN
-	read secure
+## board = SP7350
+$ECHO $COLOR_GREEN"Select boot modes:"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[1] Normal boot"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[2] Secure boot"$COLOR_ORIGIN
+read secure
 
-	if [ "$secure" = "2" ]; then
-		echo "SECURE=1" >> $BUILD_CONFIG
-		echo "ENCRYPTION=1" >> $BUILD_CONFIG
-	fi
+if [ "$secure" = "2" ]; then
+	echo "SECURE=1" >> $BUILD_CONFIG
+	echo "ENCRYPTION=1" >> $BUILD_CONFIG
+fi
 
-	sel_chip=$(chip_lookup $chip)
-	set_config_directly=1
+sel_chip=$(chip_lookup $chip)
+set_config_directly=1
 
-	chip_name="sp7350"
-	if [ "$board" = "1" ]; then
-		sel_board=ev
-	elif [ "$board" = "2" ]; then
-		sel_board=dm
-	elif [ "$board" = "3" ]; then
-		sel_board=mc
-	elif [ "$board" = "4" ]; then
-		sel_board=dev
-	elif [ "$board" = "5" ]; then
-		sel_board=xink
-	elif [ "$board" = "6" ]; then
-		sel_board=sr1
-	elif [ "$board" = "9" ]; then
-		sel_board=zebu
-	fi
+chip_name="sp7350"
+if [ "$board" = "1" ]; then
+	sel_board=ev
+elif [ "$board" = "2" ]; then
+	sel_board=dm
+elif [ "$board" = "3" ]; then
+	sel_board=mc
+elif [ "$board" = "4" ]; then
+	sel_board=evk
+elif [ "$board" = "5" ]; then
+	sel_board=dev
+elif [ "$board" = "6" ]; then
+	sel_board=xink
+elif [ "$board" = "7" ]; then
+	sel_board=sr1
+elif [ "$board" = "19" ]; then
+	sel_board=zebu
 fi
 
 if [ "$set_config_directly" = "1" ]; then
