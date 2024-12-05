@@ -293,7 +293,7 @@ list_config()
 	fi
 
 	if [ "$board" = "1" ] || [ "$board" = "2" ] || [ "$board" = "3" ] || [ "$board" = "4" ] || [ "$board" = "5" ] || \
-	   [ "$board" = "6" ] || [ "$board" = "7" ] || [ "$board" = "8" ]; then
+	   [ "$board" = "6" ] || [ "$board" = "7" ] || [ "$board" = "8" ] || [ "$board" = "9" ]; then
 		case "$sel" in
 		"1")
 			bootdev=emmc
@@ -631,6 +631,7 @@ $ECHO $COLOR_ORIGIN"[5] SP7350 Dual Ev Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[6] SP7350 XINK Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[7] SP7350 SR1 Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[8] SP7350 IC1 Board"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[9] SP7350 IT1 Board"$COLOR_ORIGIN
 #$ECHO $COLOR_ORIGIN"[19] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
 read board
 
@@ -674,6 +675,11 @@ elif [ "$board" = "8" ]; then
 	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "BOARDNAME=ic1" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-ic1" >> $BUILD_CONFIG
+elif [ "$board" = "9" ]; then
+	ARCH=arm64
+	echo "CHIP=SP7350" > $BUILD_CONFIG
+	echo "BOARDNAME=it1" >> $BUILD_CONFIG
+	echo "LINUX_DTB=sunplus/sp7350-it1" >> $BUILD_CONFIG
 elif [ "$board" = "19" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
@@ -739,6 +745,8 @@ elif [ "$board" = "7" ]; then
 	sel_board=sr1
 elif [ "$board" = "8" ]; then
 	sel_board=ic1
+elif [ "$board" = "9" ]; then
+	sel_board=it1
 elif [ "$board" = "19" ]; then
 	sel_board=zebu
 fi
