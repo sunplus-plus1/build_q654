@@ -19,7 +19,7 @@ if [ "$OVERLAYFS" = "1" ]; then
 		dd if=/dev/zero of=$OVERLAY bs=1M count=0 seek=200
 		mkfs.ext4 $OVERLAY
 	fi
-	OVERLAY="$OVERLAY none"
+	# OVERLAY="$OVERLAY none"
 else
 	if [ "$1" != "SDCARD" ]; then
 		cp $ROOTFS rootfs
@@ -36,6 +36,7 @@ cp $X xboot1
 cp $U uboot1
 cp $U uboot2
 cp $K kernel
+cp $K kernel_bkup
 
 cp $F fip
 cp $D DTB
@@ -71,9 +72,9 @@ fi
 #     If partitions' sizes listed before "kernel" are changed,
 #     please make sure U-Boot settings of CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE, CONFIG_SRCADDR_KERNEL and CONFIG_SRCADDR_DTB
 #     are changed accordingly.
-for ADDR in "CONFIG_ENV_OFFSET" "CONFIG_ENV_SIZE" "CONFIG_SRCADDR_DTB" "CONFIG_SRCADDR_KERNEL"
+for ADDR in "CONFIG_ENV_OFFSET" "CONFIG_ENV_SIZE" "CONFIG_SRCADDR_DTB" "CONFIG_SRCADDR_KERNEL" "CONFIG_SRCADDR_KERNEL_BKUP"
 do
-	cat ${TOP}boot/uboot/.config | grep --color -e ${ADDR}
+	cat ${TOP}boot/uboot/.config | grep --color -e "\b${ADDR}\b"
 done
 
 if [ "$1" = "EMMC" ]; then
@@ -94,8 +95,9 @@ if [ "$1" = "EMMC" ]; then
 			env_redund 0x80000 \
 			dtb 0x40000 \
 			kernel 0x2000000 \
-			rootfs $EMMC_SIZE \
-			$OVERLAY
+			kernel_bkup 0x2000000 \
+			rootfs  none \
+			$OVERLAY $EMMC_SIZE
 	else	
 		isp pack_image ISPBOOOT.BIN \
 			xboot0 uboot0 \
@@ -107,6 +109,7 @@ if [ "$1" = "EMMC" ]; then
 			env_redund 0x80000 \
 			dtb 0x40000 \
 			kernel 0x2000000 \
+			kernel_bkup 0x2000000 \
 			rootfs $EMMC_SIZE
 	fi
 
@@ -159,6 +162,7 @@ rm -rf xboot1
 rm -rf uboot1
 rm -rf uboot2
 rm -rf kernel
+rm -rf kernel_bkup
 rm -rf DTB
 rm -rf env
 rm -rf env_redund

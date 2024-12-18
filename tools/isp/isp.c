@@ -215,7 +215,6 @@ struct isp_info_s isp_info;
 
 #define BYTE2BLOCK(x)                   ((x + 511) >> 9)    /* 512 bytes/sector */
 
-int OVERLAYFS = 0;
 char last_partition[32];
 
 void dump_isp_info(void)
@@ -1062,23 +1061,20 @@ int pack_image(int argc, char **argv)
 				exit(-1);
 			}
 			set_partition_size = 1;
-			if (OVERLAYFS)
+			if (strcmp(argv[i], "none") == 0)
 			{
-				if (strcmp(isp_info.file_header.partition_info[idx_partition_info].file_name, "rootfs") == 0 ||
-					strcmp(isp_info.file_header.partition_info[idx_partition_info].file_name, "overlay") == 0) {		
-					if (stat(isp_info.file_header.partition_info[idx_partition_info].file_name, &file_stat) == 0) {
-						tmp_u64 = file_stat.st_size;
-						tmp_u64 = (tmp_u64 + 0x3ff) & 0xfffffffffffffc00UL;
-						isp_info.file_header.partition_info[idx_partition_info].partition_size = tmp_u64;
-						set_partition_size = 0;
-					}
+				if (stat(isp_info.file_header.partition_info[idx_partition_info].file_name, &file_stat) == 0) {
+					tmp_u64 = file_stat.st_size;
+					tmp_u64 = (tmp_u64 + 0x3ff) & 0xfffffffffffffc00UL;
+					isp_info.file_header.partition_info[idx_partition_info].partition_size = tmp_u64;
+					set_partition_size = 0;
 				}
-			}			
+			}
 			if (set_partition_size) isp_info.file_header.partition_info[idx_partition_info].partition_size = strtoull(argv[i], NULL, 0);
-
 			idx_partition_info++;
 		}
 	}
+	strcpy(last_partition, isp_info.file_header.partition_info[idx_partition_info-1].file_name);
 
 	for (i = 0; i < idx_partition_info; i++) {
 #ifdef XBOOT1_IN_EMMC_BOOTPART
@@ -2445,14 +2441,6 @@ int main(int argc, char **argv)
 		return -1;
 	} else
 		sub_cmd = argv[1];
-
-	char *penv_use_overlay = getenv("OVERLAYFS");
-	// printf("penv_use_overlay = %s\n", penv_use_overlay);
-	if (penv_use_overlay[0] != '\0') {
-		OVERLAYFS = atoi(penv_use_overlay);
-	}
-	strcpy(last_partition, "rootfs");
-	if (OVERLAYFS) strcpy(last_partition, "overlay");
 
 	/*
 	printf("--------------------------------\n");
