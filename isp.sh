@@ -8,18 +8,23 @@ X=xboot.img
 U=u-boot.img
 K=uImage
 ROOTFS=rootfs.img
-OVERLAY=
+OVERLAY=overlay
 
 if [ "$OVERLAYFS" = "1" ]; then
-	OVERLAY=overlay
 	if [ "$1" != "SDCARD" ]; then
 		cp $ROOTFS rootfs
-		[ -f $OVERLAY ] && rm $OVERLAY
-		fallocate -l 200M $OVERLAY
-		dd if=/dev/zero of=$OVERLAY bs=1M count=0 seek=200
-		mkfs.ext4 $OVERLAY
+		if [ "$1" = "NAND" ]; then
+			ROOTSIZE=$(wc -c < rootfs.img)
+			OVERLAYSIZE=$(( (ROOTSIZE / 1024 / 1024 / 2) ))
+		else
+			[ -f $OVERLAY ] && rm $OVERLAY
+			OVERLAYSIZE=200
+			echo "fallocate -l ${OVERLAYSIZE}M $OVERLAY"
+			fallocate -l ${OVERLAYSIZE}M $OVERLAY
+			dd if=/dev/zero of=$OVERLAY bs=1M count=0 seek=${OVERLAYSIZE}
+			mkfs.ext4 $OVERLAY
+		fi
 	fi
-	# OVERLAY="$OVERLAY none"
 else
 	if [ "$1" != "SDCARD" ]; then
 		cp $ROOTFS rootfs
@@ -72,7 +77,13 @@ fi
 #     If partitions' sizes listed before "kernel" are changed,
 #     please make sure U-Boot settings of CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE, CONFIG_SRCADDR_KERNEL and CONFIG_SRCADDR_DTB
 #     are changed accordingly.
-for ADDR in "CONFIG_ENV_OFFSET" "CONFIG_ENV_SIZE" "CONFIG_SRCADDR_DTB" "CONFIG_SRCADDR_KERNEL" "CONFIG_SRCADDR_KERNEL_BKUP"
+UBOOT_CONFIG_LIST="CONFIG_ENV_OFFSET CONFIG_ENV_SIZE CONFIG_SRCADDR_DTB CONFIG_SRCADDR_KERNEL"
+
+if [ "$1" = "EMMC" ]; then
+	UBOOT_CONFIG_LIST="${UBOOT_CONFIG_LIST} CONFIG_SRCADDR_KERNEL_BKUP"
+fi
+
+for ADDR in ${UBOOT_CONFIG_LIST} 
 do
 	cat ${TOP}boot/uboot/.config | grep --color -e "\b${ADDR}\b"
 done
@@ -121,17 +132,37 @@ elif [ "$1" = "NAND" ]; then
 	fi
 
 	NAND_SIZE=$(($NAND_SIZE-0x2100000))
-	isp pack_image ISPBOOOT.BIN \
-		xboot0 uboot0 \
-		xboot1 0x100000 \
-		uboot1 0x100000 \
-		uboot2 0x100000 \
-		fip 0x200000 \
-		env 0x80000 \
-		env_redund 0x80000 \
-		dtb 0x40000 \
-		kernel 0x1900000 \
-		rootfs $NAND_SIZE
+	if [ "$OVERLAYFS" = "1" ]; then
+		VALUE=$(($NAND_SIZE - ($OVERLAYSIZE * 2) - 0x2100000))
+		OVERLAYSIZE=$(( (VALUE + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1) ))
+		ROOTSIZE=$(( (ROOTSIZE + BLOCK_SIZE - 1) & ~(BLOCK_SIZE - 1) ))
+		MEGA=$((1024*1024))
+		ROOTSIZE=$(( (ROOTSIZE + MEGA - 1) & ~(MEGA - 1) ))
+		isp pack_image ISPBOOOT.BIN \
+			xboot0 uboot0 \
+			xboot1 0x100000 \
+			uboot1 0x100000 \
+			uboot2 0x100000 \
+			fip 0x200000 \
+			env 0x80000 \
+			env_redund 0x80000 \
+			dtb 0x40000 \
+			kernel 0x1900000 \
+			rootfs  $ROOTSIZE \
+			$OVERLAY $OVERLAYSIZE
+	else
+		isp pack_image ISPBOOOT.BIN \
+			xboot0 uboot0 \
+			xboot1 0x100000 \
+			uboot1 0x100000 \
+			uboot2 0x100000 \
+			fip 0x200000 \
+			env 0x80000 \
+			env_redund 0x80000 \
+			dtb 0x40000 \
+			kernel 0x1900000 \
+			rootfs $NAND_SIZE
+	fi
 
 elif [ "$1" = "PNAND" ]; then
 	isp pack_image ISPBOOOT.BIN \

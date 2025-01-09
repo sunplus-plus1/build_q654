@@ -635,7 +635,7 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 
 				// set partition fisrt for ubifs. ubi write data base on the partition info.
 #if !defined(PARTITION_SIZE_BAD_BLOCK_DOES_NOT_COUNT)
-				if (strcmp(isp_info.file_header.partition_info[i].file_name, "rootfs") == 0) {
+				if (strcmp(isp_info.file_header.partition_info[i].file_name, last_partition) == 0) {
 					fprintf(fd, "setenv isp_mtdpart_size -\n"); //set rootfs part size to remaining space
 				} else {
 					fprintf(fd, "setenv isp_mtdpart_size 0x%lx\n", isp_info.file_header.partition_info[i].partition_size);
@@ -658,7 +658,6 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 				fprintf(fd, "else\n");
 				fprintf(fd, "    exit -1\n");
 				fprintf(fd, "fi\n\n");
-
 				file_size = isp_info.file_header.partition_info[i].file_size;
 				flag_first = 1;     // first MAX_MEM_SIZE_FOR_ISP bytes of the programmed file.
 				size_programmed = 0;
@@ -679,15 +678,18 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 
 					if (flag_first) {
 						flag_first = 0;
-						if (strcmp(isp_info.file_header.partition_info[i].file_name, "rootfs") == 0) {
-							fprintf(fd, "ubi part rootfs %d\n",NAND_UBI_VID_HEAD_OFFSET);
-							fprintf(fd, "ubi create rootfs - \n");
+						if (strcmp(isp_info.file_header.partition_info[i].file_name, last_partition) == 0) {
+							fprintf(fd, "ubi part %s %d\n",last_partition,NAND_UBI_VID_HEAD_OFFSET);
+							fprintf(fd, "ubi create %s - \n",last_partition);
+							fprintf(fd, "if test \"$?\" != 0 ; then\n");
+							fprintf(fd, "    exit -1\n");
+							fprintf(fd, "fi\n");
 							snprintf(cmd, sizeof(cmd), "ubi write.part $isp_ram_addr %s 0x%lx 0x%lx",isp_info.file_header.partition_info[i].file_name,size,file_size);
 						} else {
 							snprintf(cmd, sizeof(cmd), "nand write $isp_ram_addr $isp_nand_addr 0x%lx", size);
 						}
 					} else {
-						if (strcmp(isp_info.file_header.partition_info[i].file_name, "rootfs") == 0) {
+						if (strcmp(isp_info.file_header.partition_info[i].file_name, last_partition) == 0) {
 							snprintf(cmd, sizeof(cmd), "ubi write.part $isp_ram_addr %s 0x%lx",isp_info.file_header.partition_info[i].file_name, size);
 						} else {
 							snprintf(cmd, sizeof(cmd), "nand write $isp_ram_addr $isp_addr_nand_write_next 0x%lx",
@@ -785,7 +787,7 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 	for (i = 0; i < NUM_OF_PARTITION; i++) {
 		if (isp_info.file_header.partition_info[i].partition_size == 0)
 			continue;
-		if (nand_or_emmc == IDX_NAND && strcmp(isp_info.file_header.partition_info[i].file_name, "rootfs") == 0) {
+		if (nand_or_emmc == IDX_NAND && strcmp(isp_info.file_header.partition_info[i].file_name, last_partition) == 0) {
 			// nand of ubifs, no read cmd to read part of imgdata ,for ubifs nand ,not do verify.
 			continue;
 		}

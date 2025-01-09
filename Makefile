@@ -61,6 +61,7 @@ ROOTFS_DIR = $(ROOTFS_PATH)/initramfs/disk
 BUILDROOT_DIR = $(ROOTFS_PATH)/initramfs/buildroot
 YOCTO_DIR = $(ROOTFS_PATH)/initramfs/yocto
 ROOTFS_IMG = rootfs.img
+OVERLAY_IMG = overlay
 FREERTOS_IMG = freertos.img
 
 CROSS_COMPILE_FOR_XBOOT =$(CROSS_ARM64_XBOOT_COMPILE)
@@ -392,6 +393,10 @@ isp: check tool_isp
 		exit 1; \
 	fi
 	@if [ "$(BOOT_FROM)" != "SDCARD" ] && [ "$(BOOT_FROM)" != "USB" ]; then  \
+		if [ -f $(ROOTFS_PATH)/$(OVERLAY_IMG) ]; then \
+			$(ECHO) $(COLOR_YELLOW)"Copy "$(OVERLAY_IMG)" to out folder."$(COLOR_ORIGIN); \
+			$(CP) -vf $(ROOTFS_PATH)/$(OVERLAY_IMG) $(OUT_PATH)/ ;\
+		fi; \
 		if [ -f $(ROOTFS_PATH)/$(ROOTFS_IMG) ]; then \
 			$(ECHO) $(COLOR_YELLOW)"Copy "$(ROOTFS_IMG)" to out folder."$(COLOR_ORIGIN); \
 			$(CP) -vf $(ROOTFS_PATH)/$(ROOTFS_IMG) $(OUT_PATH)/ ;\
