@@ -446,6 +446,18 @@ list_config()
 				echo "Error: Unknown config!"
 				exit 1
 			esac
+
+            $ECHO $COLOR_GREEN"Use OVERLAYFS:"$COLOR_ORIGIN
+            $ECHO $COLOR_ORIGIN"[1] YES"$COLOR_ORIGIN
+            $ECHO $COLOR_ORIGIN"[2] NO"$COLOR_ORIGIN
+            read overlay
+            case "$overlay" in
+            "1")
+                echo "OVERLAYFS=1" >> $BUILD_CONFIG
+                ;;
+            *)
+                ;;
+            esac
 		elif [ "$bootdev" = "para_nand" ]; then
 			$ECHO $COLOR_GREEN"Select NAND size:"$COLOR_ORIGIN
 			$ECHO $COLOR_ORIGIN"[1] 128 MiB"$COLOR_ORIGIN
