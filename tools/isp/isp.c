@@ -224,16 +224,16 @@ void dump_isp_info(void)
 	printf("\n%s\n\n", __func__);
 	for (i = 0; i < NUM_OF_PARTITION; i++) {
 		if (isp_info.file_header.partition_info[i].partition_size ||
-		    isp_info.file_header.partition_info[i].file_size ||
-		    isp_info.file_header.partition_info[i].file_name[0]) {
+			isp_info.file_header.partition_info[i].file_size ||
+			isp_info.file_header.partition_info[i].file_name[0]) {
 			printf("%3d: 0x%09lx/0x%09lx, 0x%08x, %-36s, 0x%08x, %s, %s\n", i,
-			       isp_info.file_header.partition_info[i].file_size,
-			       isp_info.file_header.partition_info[i].partition_size,
-			       isp_info.file_header.partition_info[i].partition_start_addr,
-			       isp_info.file_header.partition_info[i].file_name,
-			       isp_info.file_header.partition_info[i].file_offset,
-			       isp_info.file_header.partition_info[i].md5sum,
-			       isp_info.full_file_name[i]);
+			isp_info.file_header.partition_info[i].file_size,
+			isp_info.file_header.partition_info[i].partition_size,
+			isp_info.file_header.partition_info[i].partition_start_addr,
+			isp_info.file_header.partition_info[i].file_name,
+			isp_info.file_header.partition_info[i].file_offset,
+			isp_info.file_header.partition_info[i].md5sum,
+			isp_info.full_file_name[i]);
 		}
 	}
 	// printf("isp_info.file_header.flags: 0x%08x\n", isp_info.file_header.flags);
@@ -1124,9 +1124,9 @@ int pack_image(int argc, char **argv)
 
 				if (isp_info.file_header.partition_info[i].partition_size < isp_info.file_header.partition_info[i].file_size) {
 					printf("Error: Assgined partition size is less than the image size: %s, %lu < %lu\n",
-					       isp_info.file_header.partition_info[i].file_name,
-					       isp_info.file_header.partition_info[i].partition_size,
-					       isp_info.file_header.partition_info[i].file_size);
+						isp_info.file_header.partition_info[i].file_name,
+						isp_info.file_header.partition_info[i].partition_size,
+						isp_info.file_header.partition_info[i].file_size);
 					exit(-1);
 				}
 
@@ -1360,9 +1360,9 @@ int pack_image(int argc, char **argv)
 			break;
 
 		printf("%-32s 0x%lx/0x%lx (%.02lf%%) used\n",
-		       basename(isp_info.file_header.partition_info[i].file_name),
-		       isp_info.file_header.partition_info[i].file_size, isp_info.file_header.partition_info[i].partition_size,
-		       100 * (double)(isp_info.file_header.partition_info[i].file_size) / ((double)(isp_info.file_header.partition_info[i].partition_size)));
+			basename(isp_info.file_header.partition_info[i].file_name),
+			isp_info.file_header.partition_info[i].file_size, isp_info.file_header.partition_info[i].partition_size,
+			100 * (double)(isp_info.file_header.partition_info[i].file_size) / ((double)(isp_info.file_header.partition_info[i].partition_size)));
 	}
 	printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n");
 
@@ -1421,7 +1421,7 @@ int extract4update(int argc, char **argv, int extract4update_src)
 	for (i = ARGC_EXTRACT4UPDATE_PARTITION0; i < argc; i++) {
 		idx = get_partition_info_idx_by_file_name(argv[i]);
 		if ((idx < 0) ||
-		    (isp_info.file_header.partition_info[idx].flags & FLAGS_NOT_ALLOWED_TO_UPDATE)) {
+			(isp_info.file_header.partition_info[idx].flags & FLAGS_NOT_ALLOWED_TO_UPDATE)) {
 			printf("Error: %s isn't a valid partition.\n", argv[i]);
 			exit(-1);
 		}
@@ -2300,9 +2300,9 @@ int pack_image4nor_isp(int argc, char **argv)
 
 				if (isp_info.file_header.partition_info[i].partition_size < isp_info.file_header.partition_info[i].file_size) {
 					printf("Error: Assgined partition size is less than the image size: %s, %lu < %lu\n",
-					       isp_info.file_header.partition_info[i].file_name,
-					       isp_info.file_header.partition_info[i].partition_size,
-					       isp_info.file_header.partition_info[i].file_size);
+						isp_info.file_header.partition_info[i].file_name,
+						isp_info.file_header.partition_info[i].partition_size,
+						isp_info.file_header.partition_info[i].file_size);
 					exit(-1);
 				}
 
@@ -2422,9 +2422,9 @@ int pack_image4nor_isp(int argc, char **argv)
 			break;
 
 		printf("%-16s 0x%lx/0x%lx (%.02lf%%) used\n",
-		       basename(isp_info.file_header.partition_info[i].file_name),
-		       isp_info.file_header.partition_info[i].file_size, isp_info.file_header.partition_info[i].partition_size,
-		       100 * (double)(isp_info.file_header.partition_info[i].file_size) / ((double)(isp_info.file_header.partition_info[i].partition_size)));
+			basename(isp_info.file_header.partition_info[i].file_name),
+			isp_info.file_header.partition_info[i].file_size, isp_info.file_header.partition_info[i].partition_size,
+			100 * (double)(isp_info.file_header.partition_info[i].file_size) / ((double)(isp_info.file_header.partition_info[i].partition_size)));
 	}
 	printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
 	printf("Done!\n");

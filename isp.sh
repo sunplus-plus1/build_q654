@@ -17,12 +17,8 @@ if [ "$OVERLAYFS" = "1" ]; then
 			ROOTSIZE=$(wc -c < rootfs.img)
 			OVERLAYSIZE=$(( (ROOTSIZE / 1024 / 1024 / 2) ))
 		else
-			[ -f $OVERLAY ] && rm $OVERLAY
-			OVERLAYSIZE=200
-			echo "fallocate -l ${OVERLAYSIZE}M $OVERLAY"
-			fallocate -l ${OVERLAYSIZE}M $OVERLAY
-			dd if=/dev/zero of=$OVERLAY bs=1M count=0 seek=${OVERLAYSIZE}
-			mkfs.ext4 $OVERLAY
+			OVERLAYSIZE=$(wc -c < $OVERLAY)
+			OVERLAYSIZE=$(( (OVERLAYSIZE / 1024 / 1024) ))
 		fi
 	fi
 else
@@ -32,7 +28,6 @@ else
 fi
 D=dtb
 F=fip.img
-
 
 # Partition name = file name
 cp $X xboot0
