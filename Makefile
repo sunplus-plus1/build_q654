@@ -492,6 +492,7 @@ mt: check
 	@$(MAKE) rootfs rom
 
 init:
+	@command -v python3 >/dev/null || { $(ECHO) $(COLOR_RED)"Python 3 is not installed. "$(COLOR_ORIGIN); exit 1; }
 	@if ! [ -f $(CROSS_COMPILE_FOR_LINUX) ]; then \
 		./build/dlgcc.sh; \
 	fi
