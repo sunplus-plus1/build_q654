@@ -283,6 +283,10 @@ list_config()
 		$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
 		$ECHO "1"
 		sel=1
+	elif [ "$board" = "12" ]; then
+		$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
+		$ECHO "1"
+		sel=1
 	else
 		$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
 		$ECHO $COLOR_ORIGIN"[2] SD Card"$COLOR_ORIGIN
@@ -294,7 +298,7 @@ list_config()
 
 	if [ "$board" = "1" ] || [ "$board" = "2" ] || [ "$board" = "3" ] || [ "$board" = "4" ] || [ "$board" = "5" ] || \
 	   [ "$board" = "6" ] || [ "$board" = "7" ] || [ "$board" = "8" ] || [ "$board" = "9" ] || [ "$board" = "10" ] || \
-	   [ "$board" = "11" ]; then
+	   [ "$board" = "11" ] || [ "$board" = "12" ]; then
 		case "$sel" in
 		"1")
 			bootdev=emmc
@@ -647,6 +651,7 @@ $ECHO $COLOR_ORIGIN"[8] SP7350 YX5001 Nano Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[9] SP7350 SR1 Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[10] SP7350 IC1 Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[11] SP7350 IT1 Board"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[12] SP7350 DVB Board"$COLOR_ORIGIN
 #$ECHO $COLOR_ORIGIN"[19] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
 read board
 
@@ -710,6 +715,11 @@ elif [ "$board" = "19" ]; then
 	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "BOARDNAME=ev" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-ev" >> $BUILD_CONFIG
+elif [ "$board" = "12" ]; then
+	ARCH=arm64
+	echo "CHIP=SP7350" > $BUILD_CONFIG
+	echo "BOARDNAME=dvb" >> $BUILD_CONFIG
+	echo "LINUX_DTB=sunplus/sp7350-dvb" >> $BUILD_CONFIG
 else
 	echo "Error: Unknown board!"
 	exit 1
@@ -776,6 +786,8 @@ elif [ "$board" = "10" ]; then
 	sel_board=ic1
 elif [ "$board" = "11" ]; then
 	sel_board=it1
+elif [ "$board" = "12" ]; then
+	sel_board=dvb
 elif [ "$board" = "19" ]; then
 	sel_board=zebu
 fi
