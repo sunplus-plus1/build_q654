@@ -575,7 +575,7 @@ yocto: check
 	fi
 
 load_bconfig: check
-	$(eval br_defconfig := $(chip_lowercase)_defconfig)
+	$(eval br_defconfig := $(chip_lowercase)_$(BOARDNAME)_defconfig)
 	@if [ -f "$(BUILDROOT_DIR)/.config" ]; then \
 		set -e; \
 		if grep -q $(br_defconfig) $(BUILDROOT_DIR)/.config; then \
