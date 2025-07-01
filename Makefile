@@ -515,38 +515,11 @@ rootfs:
 	FLASH_SIZE=$(FLASH_SIZE) NAND_PAGE_SIZE=$(NAND_PAGE_SIZE) NAND_PAGE_CNT=$(NAND_PAGE_CNT)
 
 bconfig: load_bconfig
-	@if [ -f "$(BUILDROOT_DIR)/.config.old" ]; then \
-		rm $(BUILDROOT_DIR)/.config.old; \
-	fi
 	@$(MAKE_ARCH) -C $(BUILDROOT_DIR) menuconfig
-	@if ! diff $(BUILDROOT_DIR)/.config $(BUILDROOT_DIR)/.config.old; then \
-		if [ -f "$(ROOTFS_DIR)/lib/os-release" ]; then \
-			rm $(ROOTFS_DIR)/lib/os-release; \
-		fi; \
-    fi
 
 buildroot: load_bconfig
 	@if [ "$(ROOTFS_CONTENT)" = "BUILDROOT" ]; then \
-		set -e; \
-		if [ -f "$(BUILDROOT_DIR)/.force" ]; then \
-			while read line; do \
-				if [ "$$line" = "" ]; then continue; fi; \
-				$(MAKE_ARCH) -C $(BUILDROOT_DIR) $$line; \
-			done < $(BUILDROOT_DIR)/.force; \
-			rm -f $(ROOTFS_DIR)/lib/os-release; \
-		fi; \
-		if [ ! -f "$(ROOTFS_DIR)/lib/os-release" ]; then \
-			$(MAKE_ARCH) -C $(BUILDROOT_DIR); \
-			$(eval BUILD_IMAGE := $(BUILDROOT_DIR)/output/images) \
-			if [ -f "$(BUILD_IMAGE)/rootfs.tar" ]; then \
-				rm -rf $(ROOTFS_DIR); \
-				mkdir $(ROOTFS_DIR); \
-				tar xvf ${BUILD_IMAGE}/rootfs.tar -C $(ROOTFS_DIR) > /dev/null; \
-				mkdir -p ${ROOTFS_DIR}/lib/firmware; \
-			fi; \
-		else \
-			$(ECHO) $(COLOR_YELLOW)"Buildroot has been compiled."$(COLOR_ORIGIN); \
-		fi; \
+		$(MAKE_ARCH) -C $(BUILDROOT_DIR); \
 	fi
 
 yocto: check
@@ -575,14 +548,16 @@ yocto: check
 	fi
 
 load_bconfig: check
-	$(eval br_defconfig := $(chip_lowercase)_$(BOARDNAME)_defconfig)
-	@if [ -f "$(BUILDROOT_DIR)/.config" ]; then \
+	$(eval br_defconfig := $(if $(wildcard $(BUILDROOT_DIR)/configs/$(chip_lowercase)_$(BOARDNAME)_defconfig), \
+				$(chip_lowercase)_$(BOARDNAME)_defconfig, \
+				$(chip_lowercase)_$(BOARDNAME)_defconfig))
+	if [ -f "$(BUILDROOT_DIR)/.config" ]; then \
 		set -e; \
 		if grep -q $(br_defconfig) $(BUILDROOT_DIR)/.config; then \
 			$(ECHO) $(COLOR_YELLOW)"using $(br_defconfig)"$(COLOR_ORIGIN); \
 		else \
 			$(ECHO) $(COLOR_RED)"reload $(br_defconfig)"$(COLOR_ORIGIN); \
-			rm -rf $(BUILDROOT_DIR)/output; \
+			$(MAKE_ARCH) -C $(BUILDROOT_DIR) clean; \
 			$(MAKE_ARCH) -C $(BUILDROOT_DIR) $(br_defconfig); \
 		fi; \
 	else \
