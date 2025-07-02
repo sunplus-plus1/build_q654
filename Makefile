@@ -237,7 +237,7 @@ distclean: clean
 	@$(MAKE_ARCH) -C $(LINUX_PATH) $@
 	@$(RM) -f $(CONFIG_ROOT)
 	@$(RM) -f $(HW_CONFIG_ROOT)
-	@$(MAKE) -C $(BUILDROOT_DIR) clean
+	@$(MAKE) -C $(BUILDROOT_DIR) $@
 	@$(MAKE) -C $(YOCTO_DIR) cleanall
 
 __config: clean
@@ -550,7 +550,7 @@ yocto: check
 load_bconfig: check
 	$(eval br_defconfig := $(if $(wildcard $(BUILDROOT_DIR)/configs/$(chip_lowercase)_$(BOARDNAME)_defconfig), \
 				$(chip_lowercase)_$(BOARDNAME)_defconfig, \
-				$(chip_lowercase)_$(BOARDNAME)_defconfig))
+				$(chip_lowercase)_defconfig))
 	if [ -f "$(BUILDROOT_DIR)/.config" ]; then \
 		set -e; \
 		if grep -q $(br_defconfig) $(BUILDROOT_DIR)/.config; then \
