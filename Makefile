@@ -551,7 +551,7 @@ load_bconfig: check
 	$(eval br_defconfig := $(if $(wildcard $(BUILDROOT_DIR)/configs/$(chip_lowercase)_$(BOARDNAME)_defconfig), \
 				$(chip_lowercase)_$(BOARDNAME)_defconfig, \
 				$(chip_lowercase)_defconfig))
-	if [ -f "$(BUILDROOT_DIR)/.config" ]; then \
+	@if [ -f "$(BUILDROOT_DIR)/.config" ]; then \
 		set -e; \
 		if grep -q $(br_defconfig) $(BUILDROOT_DIR)/.config; then \
 			$(ECHO) $(COLOR_YELLOW)"using $(br_defconfig)"$(COLOR_ORIGIN); \
