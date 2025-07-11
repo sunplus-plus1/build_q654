@@ -270,7 +270,7 @@ rootfs_content=BUSYBOX
 list_config()
 {
 	sel=1
-	if [ "$board" = "1" ]; then
+	if [ "$board" = "1" ] || [ "$board" = "13" ]; then
 		$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
 		$ECHO $COLOR_ORIGIN"[2] SPI-NAND"$COLOR_ORIGIN
 		$ECHO $COLOR_ORIGIN"[3] SPI-NOR (jffs2)"$COLOR_ORIGIN
@@ -298,7 +298,7 @@ list_config()
 
 	if [ "$board" = "1" ] || [ "$board" = "2" ] || [ "$board" = "3" ] || [ "$board" = "4" ] || [ "$board" = "5" ] || \
 	   [ "$board" = "6" ] || [ "$board" = "7" ] || [ "$board" = "8" ] || [ "$board" = "9" ] || [ "$board" = "10" ] || \
-	   [ "$board" = "11" ] || [ "$board" = "12" ]; then
+	   [ "$board" = "11" ] || [ "$board" = "12" ] || [ "$board" = "13" ]; then
 		case "$sel" in
 		"1")
 			bootdev=emmc
@@ -652,6 +652,7 @@ $ECHO $COLOR_ORIGIN"[9] SP7350 SR1 Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[10] SP7350 IC1 Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[11] SP7350 IT1 Board"$COLOR_ORIGIN
 $ECHO $COLOR_ORIGIN"[12] SP7350 DVB Board"$COLOR_ORIGIN
+$ECHO $COLOR_ORIGIN"[13] SP7350 EVS Board"$COLOR_ORIGIN
 #$ECHO $COLOR_ORIGIN"[19] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
 read board
 
@@ -710,16 +711,21 @@ elif [ "$board" = "11" ]; then
 	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "BOARDNAME=it1" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-it1" >> $BUILD_CONFIG
-elif [ "$board" = "19" ]; then
-	ARCH=arm64
-	echo "CHIP=SP7350" > $BUILD_CONFIG
-	echo "BOARDNAME=ev" >> $BUILD_CONFIG
-	echo "LINUX_DTB=sunplus/sp7350-ev" >> $BUILD_CONFIG
 elif [ "$board" = "12" ]; then
 	ARCH=arm64
 	echo "CHIP=SP7350" > $BUILD_CONFIG
 	echo "BOARDNAME=dvb" >> $BUILD_CONFIG
 	echo "LINUX_DTB=sunplus/sp7350-dvb" >> $BUILD_CONFIG
+elif [ "$board" = "13" ]; then
+	ARCH=arm64
+	echo "CHIP=SP7350" > $BUILD_CONFIG
+	echo "BOARDNAME=evs" >> $BUILD_CONFIG
+	echo "LINUX_DTB=sunplus/sp7350-evs" >> $BUILD_CONFIG
+elif [ "$board" = "19" ]; then
+	ARCH=arm64
+	echo "CHIP=SP7350" > $BUILD_CONFIG
+	echo "BOARDNAME=ev" >> $BUILD_CONFIG
+	echo "LINUX_DTB=sunplus/sp7350-ev" >> $BUILD_CONFIG
 else
 	echo "Error: Unknown board!"
 	exit 1
@@ -788,6 +794,8 @@ elif [ "$board" = "11" ]; then
 	sel_board=it1
 elif [ "$board" = "12" ]; then
 	sel_board=dvb
+elif [ "$board" = "13" ]; then
+	sel_board=evs
 elif [ "$board" = "19" ]; then
 	sel_board=zebu
 fi
