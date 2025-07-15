@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<configuration>
+    <parser_instructions>
+        <!-- NOTE: entries here are used by the parser when generating output -->
+        <!-- NOTE: each filename must be on it's own line as in variable=value-->
+        WRITE_PROTECT_BOUNDARY_IN_KB=0
+        SECTOR_SIZE_IN_BYTES = 512
+        GROW_LAST_PARTITION_TO_FILL_DISK=false
+    </parser_instructions>
+
+    <!-- NOTE: "physical_partition" are listed in order and apply to UFS devices that have physical partitions -->
+
+    <!-- This is LUN 0 - HLOS LUN" -->
+    <physical_partition>
+        <partition label="uboot1" size_in_kb="1024" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename="" />
+        <partition label="uboot2" size_in_kb="1024" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename="" />
+        <partition label="fip" size_in_kb="1024" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename=""/>
+        <partition label="env" size_in_kb="512" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename="" />
+        <partition label="env_redund" size_in_kb="512" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename="" />
+        <partition label="rootfs1" size_in_kb="4110080" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename=""/>
+        <partition label="rootfs2" size_in_kb="51200" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename=""/>
+        <partition label="dtb1" size_in_kb="256" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename=""/>
+        <partition label="dtb2" size_in_kb="256" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename=""/>
+        <partition label="kernel1" size_in_kb="32768" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename=""/>
+        <partition label="kernel2" size_in_kb="32768" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename=""/>
+        <partition label="nv" size_in_kb="34816" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename=""/>
+        <partition label="ddr_dump" size_in_kb="1153024" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename=""/>
+        <partition label="userdata" size_in_kb="1992192" type="ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" bootable="false" readonly="false" filename=""/> <!-- fixed 3G, extend according to free space left later" -->
+    </physical_partition>
+</configuration>

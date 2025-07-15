@@ -10,6 +10,55 @@ K=uImage
 ROOTFS=rootfs.img
 OVERLAY=overlay
 
+if [ "$1" = "EMMC" ]; then
+	if [ "$BOARD" = "dvb" ]; then
+		NV=nv.img
+		USERDATA=userdata.img
+		partition_file=partition.xml
+		MKFS="fakeroot -- mke2fs"
+
+		rm -rf $NV $USERDATA
+		rm -rf recovery.img
+		$MKFS -t ext4 -b 4096 -I 256 -i 2048 "$USERDATA" "10M"
+		$MKFS -t ext4 -b 4096 -I 256 -i 2048 recovery.img "10M"
+		python ${TOP}build/tools/partition/ptool.py -n -x ${TOP}build/tools/partition/$partition_file -t .ptool >/dev/null
+		partition_info=$(python ${TOP}build/tools/partition/generate_partition_info.py ${TOP}build/tools/partition/$partition_file)
+		# 34M 34*1024*1024/1024
+		fakeroot -- mkfs.fat -F 32 -C "$NV" 34816
+		envsize=$(echo $partition_info | grep -o 'env [0-9xA-Fa-f]*' | awk '{print $2}')
+		envsize=$(printf "%d" "$((envsize))")
+		fakeroot -- dd if=/dev/zero of=env bs=$envsize count=1
+		mmd -i "$NV" ::sensor
+		mmd -i "$NV" ::system
+		cp $X xboot0
+		cp $U uboot0
+		cp $X xboot1
+		cp $U uboot1
+		cp $U uboot2
+		cp $K kernel1
+		cp $K kernel2
+		cp $NV nv
+		cp dtb dtb1
+		cp dtb dtb2
+		cp fip.img fip
+		cp env env_redund
+		cp $ROOTFS rootfs1
+		cp recovery.img rootfs2
+		cp $USERDATA userdata
+		cp .ptool/gpt_main0.bin gpt
+		isp pack_image ISPBOOOT.BIN \
+			xboot0 uboot0 \
+			xboot1 0x100000 \
+			$partition_info \
+			gpt 0x4400
+		rm -rf .ptool
+		rm -rf xboot0 uboot0 xboot1 uboot1 uboot2 fip env env_redund dtb1 dtb2
+		rm -rf kernel1 kernel2 rootfs1 rootfs2
+		rm -rf userdata ddr_dump nv zeros_1sector.bin zeros_33sectors.bin
+		exit 0
+	fi
+fi
+
 if [ "$OVERLAYFS" = "1" ]; then
 	if [ "$1" != "SDCARD" ]; then
 		cp $ROOTFS rootfs

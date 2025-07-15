@@ -140,7 +140,7 @@ firmware:
 
 #xboot build
 xboot: check
-	@$(MAKE) ARCH=$(ARCH_XBOOT) $(MAKE_JOBS) -C $(XBOOT_PATH) CROSS=$(CROSS_COMPILE_FOR_XBOOT) SECURE=$(SECURE) ENCRYPTION=$(ENCRYPTION) all
+	@$(MAKE) ARCH=$(ARCH_XBOOT) $(MAKE_JOBS) -C $(XBOOT_PATH) CROSS=$(CROSS_COMPILE_FOR_XBOOT) SECURE=$(SECURE) ENCRYPTION=$(ENCRYPTION) BOARD=$(BOARDNAME) all
 	@$(MAKE) secure SECURE_PATH=xboot
 	@$(MAKE) warmboot
 
@@ -405,7 +405,7 @@ isp: check tool_isp
 			exit 1; \
 		fi \
 	fi
-	@cd out/; OVERLAYFS=$(OVERLAYFS) ./$(ISP_SHELL) $(BOOT_FROM) $(CHIP) $(FLASH_SIZE) $(NAND_PAGE_SIZE) $(NAND_PAGE_CNT)
+	cd out/; OVERLAYFS=$(OVERLAYFS) BOARD=$(BOARDNAME) ./$(ISP_SHELL) $(BOOT_FROM) $(CHIP) $(FLASH_SIZE) $(NAND_PAGE_SIZE) $(NAND_PAGE_CNT)
 
 	@if [ "$(BOOT_FROM)" = "SDCARD" ]; then  \
 		$(ECHO) $(COLOR_YELLOW) "Generating image for SD card..." $(COLOR_ORIGIN); \
