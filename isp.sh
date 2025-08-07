@@ -11,7 +11,7 @@ ROOTFS=rootfs.img
 OVERLAY=overlay
 
 if [ "$1" = "EMMC" ]; then
-	if [ "$BOARD" = "dvb" ]; then
+	if [ "$BOARD" = "dvb" ] || [ "$BOARD" = "evs" ]; then
 		NV=nv.img
 		USERDATA=userdata.img
 		partition_file=partition.xml
