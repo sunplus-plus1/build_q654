@@ -498,7 +498,7 @@ init:
 	fi
 	@$(RM) -f $(CONFIG_ROOT)
 	@UBUNTU_PREBUILD_URL=$$(/usr/local/bin/sunplus-config-ext prebuild_url 2>/dev/null); \
-	UBUNTU_PREBUILD_URL=$$UBUNTU_PREBUILD_URL ./build/config.sh
+	UBUNTU_PREBUILD_URL=$$UBUNTU_PREBUILD_URL ./build/config.sh $(CROSS_COMPILE_FOR_LINUX) $(BOARD_SEL) $(BOOT_SEL) $(STORAGE_SIZE_SEL) $(ROOTFS_SEL) $(OVERLAY_SEL) $(SECURE_SEL)
 
 check:
 	@if ! [ -f $(CONFIG_ROOT) ]; then \

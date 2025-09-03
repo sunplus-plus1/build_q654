@@ -267,18 +267,32 @@ runzebu=0
 zmem=0
 rootfs_content=BUSYBOX
 
+if [ "$7"x != x ]
+then
+	board_sel=$2
+	boot_sel=$3
+	storage_size_sel=$4
+	rootfs_sel=$5
+	overlay_sel=$6
+	secure_sel=$7
+fi
+
 list_config()
 {
 	sel=1
 	if [ "$board" = "1" ] || [ "$board" = "13" ]; then
-		$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
-		$ECHO $COLOR_ORIGIN"[2] SPI-NAND"$COLOR_ORIGIN
-		$ECHO $COLOR_ORIGIN"[3] SPI-NOR (jffs2)"$COLOR_ORIGIN
-		$ECHO $COLOR_ORIGIN"[4] NOR/Romter (initramfs)"$COLOR_ORIGIN
-		$ECHO $COLOR_ORIGIN"[5] SD Card"$COLOR_ORIGIN
-		$ECHO $COLOR_ORIGIN"[6] TFTP server"$COLOR_ORIGIN
-		$ECHO $COLOR_ORIGIN"[8] 8-bit NAND"$COLOR_ORIGIN
-		read sel
+		if [ x"$boot_sel" == x ]; then
+			$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[2] SPI-NAND"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[3] SPI-NOR (jffs2)"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[4] NOR/Romter (initramfs)"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[5] SD Card"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[6] TFTP server"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[8] 8-bit NAND"$COLOR_ORIGIN
+			read sel
+		else
+			sel=$boot_sel
+		fi
 	elif [ "$board" = "10" ]; then
 		$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
 		$ECHO "1"
@@ -288,9 +302,13 @@ list_config()
 		$ECHO "1"
 		sel=1
 	else
-		$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
-		$ECHO $COLOR_ORIGIN"[2] SD Card"$COLOR_ORIGIN
-		read sel
+		if [ x"$boot_sel" == x ]; then
+			$ECHO $COLOR_ORIGIN"[1] eMMC"$COLOR_ORIGIN
+			$ECHO $COLOR_ORIGIN"[2] SD Card"$COLOR_ORIGIN
+			read sel
+		else
+			sel=$boot_sel
+		fi
 		if [ "$sel" == "2" ]; then
 			sel=5
 		fi
@@ -353,14 +371,18 @@ list_config()
 		fi
 
 		if [ "$bootdev" = "emmc" ]; then
-			$ECHO $COLOR_GREEN"Select eMMC size:"$COLOR_ORIGIN
-			$ECHO $COLOR_ORIGIN"[1] 1 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_ORIGIN"[2] 2 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_ORIGIN"[3] 4 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_ORIGIN"[4] 8 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_ORIGIN"[5] 16 GiB"$COLOR_ORIGIN
-			$ECHO $COLOR_ORIGIN"[6] 32 GiB"$COLOR_ORIGIN
-			read sel
+			if [ x"$storage_size_sel" == x ]; then
+				$ECHO $COLOR_GREEN"Select eMMC size:"$COLOR_ORIGIN
+				$ECHO $COLOR_ORIGIN"[1] 1 GiB"$COLOR_ORIGIN
+				$ECHO $COLOR_ORIGIN"[2] 2 GiB"$COLOR_ORIGIN
+				$ECHO $COLOR_ORIGIN"[3] 4 GiB"$COLOR_ORIGIN
+				$ECHO $COLOR_ORIGIN"[4] 8 GiB"$COLOR_ORIGIN
+				$ECHO $COLOR_ORIGIN"[5] 16 GiB"$COLOR_ORIGIN
+				$ECHO $COLOR_ORIGIN"[6] 32 GiB"$COLOR_ORIGIN
+				read sel
+			else
+				sel=$storage_size_sel
+			fi
 			case "$sel" in
 			"1")
 				echo "FLASH_SIZE=1024" >> $BUILD_CONFIG
@@ -587,15 +609,20 @@ list_config()
 				exit 1
 			fi
 
-			idx=1
-			$ECHO ${COLOR_GREEN}"Select rootfs:"$COLOR_ORIGIN
-			for n in $(seq -s ' ' $MENU_ROOTFS_NUM)
-			do
-				$ECHO $COLOR_ORIGIN"[$idx] $(menu_rootfs_title $n)"$COLOR_ORIGIN
-				idx=$((idx + 1))
-			done
+			if [ x"$rootfs_sel" == x ]; then
+				idx=1
+				$ECHO ${COLOR_GREEN}"Select rootfs:"$COLOR_ORIGIN
+				for n in $(seq -s ' ' $MENU_ROOTFS_NUM)
+				do
+					$ECHO $COLOR_ORIGIN"[$idx] $(menu_rootfs_title $n)"$COLOR_ORIGIN
+					idx=$((idx + 1))
+				done
 
-			read sel
+				read sel
+			else
+				sel=$rootfs_sel
+			fi
+			
 			rootfs_content=$(menu_rootfs_content $sel)
 			if [ -z "$rootfs_content" ]; then
 				echo "Error: Unknown config!"
@@ -615,10 +642,14 @@ list_config()
 			fi
 
 			if [ "$bootdev" = "emmc" ]; then
-				$ECHO $COLOR_GREEN"Use OVERLAYFS:"$COLOR_ORIGIN
-				$ECHO $COLOR_ORIGIN"[1] YES"$COLOR_ORIGIN
-				$ECHO $COLOR_ORIGIN"[2] NO"$COLOR_ORIGIN
-				read overlay
+				if [ x"$overlay_sel" == x ]; then
+					$ECHO $COLOR_GREEN"Use OVERLAYFS:"$COLOR_ORIGIN
+					$ECHO $COLOR_ORIGIN"[1] YES"$COLOR_ORIGIN
+					$ECHO $COLOR_ORIGIN"[2] NO"$COLOR_ORIGIN
+					read overlay
+				else
+					overlay=$overlay_sel
+				fi
 				case "$overlay" in
 				"1")
 					echo "OVERLAYFS=1" >> $BUILD_CONFIG
@@ -639,22 +670,26 @@ list_config()
 	fi
 }
 
-$ECHO $COLOR_GREEN"Select boards:"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[1] SP7350 Ev Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[2] SP7350 IO Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[3] SP7350 MC Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[4] SP7350 EVK Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[5] SP7350 Dual Ev Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[6] SP7350 XINK V1 Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[7] SP7350 XINK Nano Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[8] SP7350 YX5001 Nano Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[9] SP7350 SR1 Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[10] SP7350 IC1 Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[11] SP7350 IT1 Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[12] SP7350 DVB Board"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[13] SP7350 EVS Board"$COLOR_ORIGIN
-#$ECHO $COLOR_ORIGIN"[19] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
-read board
+if [ x"$board_sel" == x ]; then
+	$ECHO $COLOR_GREEN"Select boards:"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[1] SP7350 Ev Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[2] SP7350 IO Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[3] SP7350 MC Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[4] SP7350 EVK Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[5] SP7350 Dual Ev Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[6] SP7350 XINK V1 Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[7] SP7350 XINK Nano Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[8] SP7350 YX5001 Nano Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[9] SP7350 SR1 Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[10] SP7350 IC1 Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[11] SP7350 IT1 Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[12] SP7350 DVB Board"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[13] SP7350 EVS Board"$COLOR_ORIGIN
+	#$ECHO $COLOR_ORIGIN"[19] SP7350 Zebu (ZMem)"$COLOR_ORIGIN
+	read board
+else
+	board=$board_sel
+fi
 
 if [ "$board" = "1" ]; then
 	ARCH=arm64
@@ -756,10 +791,14 @@ list_config
 set_config_directly=0
 
 ## board = SP7350
-$ECHO $COLOR_GREEN"Select boot modes:"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[1] Normal boot"$COLOR_ORIGIN
-$ECHO $COLOR_ORIGIN"[2] Secure boot"$COLOR_ORIGIN
-read secure
+if [ x"$secure_sel" == x ]; then
+	$ECHO $COLOR_GREEN"Select boot modes:"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[1] Normal boot"$COLOR_ORIGIN
+	$ECHO $COLOR_ORIGIN"[2] Secure boot"$COLOR_ORIGIN
+	read secure
+else
+	secure=$secure_sel
+fi
 
 if [ "$secure" = "2" ]; then
 	echo "SECURE=1" >> $BUILD_CONFIG
