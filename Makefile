@@ -76,6 +76,7 @@ ARCH_UBOOT = $(ARCH_XBOOT)
 XBOOT_LPDDR4_MAX = $$((192 * 1024))
 
 SDCARD_BOOT_MODE = 3
+SECURE_KEY ?= 9
 
 # xboot uses name field of u-boot header to differeciate between C-chip boot image
 # and P-chip boot image. If name field has prefix "uboot_B", it boots from P chip.
@@ -117,10 +118,29 @@ all: check
 	elif [ "$(ROOTFS_CONTENT)" = "BUILDROOT" ]; then \
 		$(MAKE) buildroot; \
 	fi
+	@if [ "$(SECURE)" = "1" ] && [ "$(SECURE_KEY)" = "0" ]; then \
+		$(MAKE) xboot SECURE=0; \
+		cp $(XBOOT_PATH)/bin/${XBOOT_BIN} $(OUT_PATH)/xboot_non_secure; \
+	fi
 	@$(MAKE) xboot
 	@$(MAKE) dtb
+	@if [ "$(SECURE)" = "1" ]  && [ "$(SECURE_KEY)" = "0" ]; then \
+		$(MAKE) uboot SECURE=0; \
+		if [ $$? -ne 0 ]; then \
+			exit 1; \
+		fi; \
+		cp $(UBOOT_PATH)/${UBOOT_BIN} $(OUT_PATH)/uboot_non_secure; \
+	fi
 	@$(MAKE) uboot
+	@if [ "$(SECURE)" = "1" ] && [ "$(SECURE_KEY)" = "0" ];  then \
+		$(MAKE) fip SECURE=0; \
+		if [ $$? -ne 0 ]; then \
+			exit 1; \
+		fi; \
+		cp $(FIP_PATH)/build/$(FIP_BIN) $(OUT_PATH)/fip_non_secure; \
+	fi
 	@$(MAKE) fip
+
 	@$(MAKE) firmware
 	@if [ "$(BOOT_FROM)" = "SPINOR" ]; then \
 		$(MAKE) rootfs ; \
@@ -140,7 +160,10 @@ firmware:
 
 #xboot build
 xboot: check
-	@$(MAKE) ARCH=$(ARCH_XBOOT) $(MAKE_JOBS) -C $(XBOOT_PATH) CROSS=$(CROSS_COMPILE_FOR_XBOOT) SECURE=$(SECURE) ENCRYPTION=$(ENCRYPTION) all
+	@$(MAKE) ARCH=$(ARCH_XBOOT) $(MAKE_JOBS) -C $(XBOOT_PATH) CROSS=$(CROSS_COMPILE_FOR_XBOOT) \
+	FIP0=$$(( $(SECURE_KEY) == 0 ? 1 : 0 )) \
+	SECURE=$(SECURE) \
+	ENCRYPTION=$(ENCRYPTION) all
 	@$(MAKE) secure SECURE_PATH=xboot
 	@$(MAKE) warmboot
 
@@ -156,6 +179,7 @@ fip: check
 	@cd optee; ./optee_build.sh $(CHIP) $(CROSS_ARM64_COMPILE); cd .. ;
 	@$(MAKE) -f $(FIP_PATH)/sp7350.mk CROSS=$(CROSS_ARM64_COMPILE) build ;
 	@$(MAKE) secure SECURE_PATH=fip ;
+
 #uboot build
 uboot: check
 	@if [ $(BOOT_KERNEL_FROM_TFTP) -eq 1 ]; then \
@@ -164,9 +188,10 @@ uboot: check
 			-DBOARD_MAC_ADDR=$(BOARD_MAC_ADDR) -DOVERLAYFS=$(OVERLAYFS) -DUSER_NAME=$(USER_NAME)"; \
 	else \
 		$(MAKE) ARCH=$(ARCH_UBOOT) $(MAKE_JOBS) -C $(UBOOT_PATH) all CROSS_COMPILE=$(CROSS_COMPILE_FOR_LINUX) EXT_DTB=../../linux/kernel/dtb \
-			KCPPFLAGS="-DSPINOR=$(SPINOR) -DNOR_JFFS2=$(NOR_JFFS2) -DCOMPILE_WITH_SECURE=$(SECURE) -DOVERLAYFS=$(OVERLAYFS) -DNAND_PAGE_SIZE=$(NAND_PAGE_SIZE)"; \
+			KCPPFLAGS="-DSPINOR=$(SPINOR) -DNOR_JFFS2=$(NOR_JFFS2) -DCOMPILE_WITH_SECURE=$(SECURE) -DOVERLAYFS=$(OVERLAYFS) \
+			-DFIP0=$$(( $(SECURE_KEY) == 0 ? 1 : 0 )) \
+			-DNAND_PAGE_SIZE=$(NAND_PAGE_SIZE)"; \
 	fi
-
 	@dd if=$(TOPDIR)/$(UBOOT_PATH)/u-boot.bin of=$(TOPDIR)/$(UBOOT_PATH)/u-boot.bin  bs=1 skip=64 conv=notrunc 2>/dev/null ;
 	@$(MAKE) secure SECURE_PATH=uboot
 
@@ -405,7 +430,9 @@ isp: check tool_isp
 			exit 1; \
 		fi \
 	fi
-	@cd out/; OVERLAYFS=$(OVERLAYFS) ./$(ISP_SHELL) $(BOOT_FROM) $(CHIP) $(FLASH_SIZE) $(NAND_PAGE_SIZE) $(NAND_PAGE_CNT)
+	@cd out/; OVERLAYFS=$(OVERLAYFS) \
+	FIP0=$$(( $(SECURE) == 1 && $(SECURE_KEY) == 0 ? 1 : 0 )) \
+	./$(ISP_SHELL) $(BOOT_FROM) $(CHIP) $(FLASH_SIZE) $(NAND_PAGE_SIZE) $(NAND_PAGE_CNT)
 
 	@if [ "$(BOOT_FROM)" = "SDCARD" ]; then  \
 		$(ECHO) $(COLOR_YELLOW) "Generating image for SD card..." $(COLOR_ORIGIN); \
@@ -646,6 +673,7 @@ info:
 	@$(ECHO) "ZMEM =" $(ZMEM)
 	@$(ECHO) "OVERLAYFS =" $(OVERLAYFS)
 	@$(ECHO) "SECURE =" $(SECURE)
+	@$(ECHO) "SECURE_KEY =" $(SECURE_KEY)
 	@$(ECHO) "ENCRYPTION =" $(ENCRYPTION)
 	@$(ECHO) "ROOTFS_CONTENT =" $(ROOTFS_CONTENT)
 

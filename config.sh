@@ -754,6 +754,17 @@ read secure
 if [ "$secure" = "2" ]; then
 	echo "SECURE=1" >> $BUILD_CONFIG
 	echo "ENCRYPTION=1" >> $BUILD_CONFIG
+	if [ "$bootdev" = "emmc" ]; then
+		$ECHO $COLOR_GREEN"Current OTP secure key:"$COLOR_ORIGIN
+		$ECHO $COLOR_ORIGIN"[1] empty"$COLOR_ORIGIN
+		$ECHO $COLOR_ORIGIN"[2] written"$COLOR_ORIGIN
+		read secure_key
+		securekey=0
+		if [ "$secure_key" == "2" ]; then
+			securekey=1
+		fi
+		echo "SECURE_KEY=${securekey}" >> $BUILD_CONFIG
+	fi
 fi
 
 sel_chip=$(chip_lookup $chip)

@@ -30,8 +30,29 @@ D=dtb
 F=fip.img
 
 # Partition name = file name
-cp $X xboot0
-cp $U uboot0
+if [ "${FIP0}" = "1" ]; then
+	PUBKEY=`cat $TOP/build/tools/secure_sp7350/secure/otp_Sb_keys/ed_pub_0.hex`
+	if [ "$?" != "0" ]; then
+		exit 1
+	fi
+	PRIKEY=`cat $TOP/build/tools/secure_sp7350/secure/otp_Device_keys/x_priv_0.hex`
+	if [ "$?" != "0" ]; then
+		exit 1
+	fi
+	cp xboot_non_secure xboot0
+	if [ "$?" != "0" ]; then
+		exit 1
+	fi
+	cp uboot_non_secure uboot0
+	if [ "$?" != "0" ]; then
+		exit 1
+	fi
+	FIP0=fip_non_secure
+else
+	cp $X xboot0
+	cp $U uboot0
+fi
+
 cp $X xboot1
 cp $U uboot1
 cp $U uboot2
@@ -91,6 +112,7 @@ if [ "$1" = "EMMC" ]; then
 	fi
 	EMMC_SIZE=$(($EMMC_SIZE-0x2000000))
 	if [ "$OVERLAYFS" = "1" ]; then
+		PUBKEY=${PUBKEY} PRIKEY=${PRIKEY} FIP0=${FIP0} \
 		isp pack_image ISPBOOOT.BIN \
 			xboot0 uboot0 \
 			xboot1 0x100000 \
@@ -105,6 +127,7 @@ if [ "$1" = "EMMC" ]; then
 			rootfs  none \
 			$OVERLAY $EMMC_SIZE
 	else	
+		PUBKEY=${PUBKEY} PRIKEY=${PRIKEY} FIP0=${FIP0} \
 		isp pack_image ISPBOOOT.BIN \
 			xboot0 uboot0 \
 			xboot1 0x100000 \
@@ -196,6 +219,9 @@ rm -rf rootfs
 rm -rf $OVERLAY
 rm -rf reserve
 rm -rf fip
+rm -f xboot_non_secure
+rm -f uboot_non_secure
+rm -f fip_non_secure
 
 # Create image for booting from SD card or USB storage.
 if [ "$1" = "SDCARD" ]; then

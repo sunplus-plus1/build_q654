@@ -117,6 +117,7 @@
 
 #define FILE_SIZE_IMAGE_XBOOT0                      (192 << 10)
 #define FILE_SIZE_IMAGE_UBOOT0                      ((1536 << 10) - FILE_SIZE_IMAGE_XBOOT0) //add 512k uboot size for nand
+#define FILE_SIZE_IMAGE_FIP0                      	((1856 << 10) - FILE_SIZE_IMAGE_UBOOT0) //add 512k fip size
 
 #define NAND_READ_BY_PARTITION_NAME                         // if not defined, it's by NAND address
 // #define PARTITION_SIZE_BAD_BLOCK_DOES_NOT_COUNT
@@ -195,6 +196,7 @@ struct isp_info_s {
 	u08 full_file_name[NUM_OF_PARTITION][SIZE_FULL_FILE_NAME];
 	u08 full_file_name_xboot0[SIZE_FULL_FILE_NAME];
 	u08 full_file_name_uboot0[SIZE_FULL_FILE_NAME];
+	u08 full_file_name_fip0[SIZE_FULL_FILE_NAME];
 	u08 file_name_pack_image[SIZE_FULL_FILE_NAME];
 	// u08 base_file_name_pack_image[SIZE_FILE_NAME];
 	int nand_block_size;
@@ -204,7 +206,11 @@ struct isp_info_s {
 	char file_disk_image[32];
 	int idx_gpt_header_primary;
 	u08 *key_ptr;
+	int secure;
+	char pubkey[512];
+	char prikey[512];
 };
+
 #define FLAGS_STAGE_WRITE               (1 << 0)
 #define FLAGS_STAGE_VERIFY              (1 << 1)
 #define FLAGS_GPT_CREATED               (1 << 2)
@@ -454,6 +460,21 @@ int gen_script_main(char *file_name_isp_script, int nand_or_emmc)
 		fprintf(fd, "echo \"%s\"\n", cmd);
 		fprintf(fd, "%s\n\n", cmd);
 	} else if (nand_or_emmc == IDX_EMMC) {
+		if (isp_info.secure) {
+			fprintf(fd, "setexpr reg_addr 0xf8800000\n");
+			fprintf(fd, "md.l ${reg_addr} 1\n");
+			fprintf(fd, "setexpr reg_val *${reg_addr}\n");
+			fprintf(fd, "if test ${reg_val} = a30; then\n");
+			fprintf(fd, "\techo \"MP bit can only be enabled on version B \"\n");
+			fprintf(fd, "\texit\n");
+			fprintf(fd, "fi\n");
+			// fprintf(fd, "echo write public key %s\n", isp_info.pubkey);
+			fprintf(fd, "wotps 64 %s 1 || exit\n", isp_info.pubkey);
+			// fprintf(fd, "echo write private key %s 1\n", isp_info.prikey);
+			fprintf(fd, "wotps 96 %s 1 || exit\n", isp_info.prikey);
+			// fprintf(fd, "echo MP and secure enable\n");
+			fprintf(fd, "wotps 0 05 1 || exit\n");
+		}
 		fprintf(fd, "echo Initialize eMMC ...\n");
 		fprintf(fd, "mmc dev 0 && mmc rescan\n\n");
 #ifndef XBOOT1_IN_EMMC_BOOTPART
@@ -967,7 +988,7 @@ int pack_image(int argc, char **argv)
 	FILE *fd;
 	int i, j, set_partition_size;
 	struct stat file_stat;
-	char tmp_file[32], tmp_file2[32], tmp_file3[32], file_name_isp_script[NUM_STORAGE][32], cmd[1024];
+	char tmp_file[32], tmp_file2[32], tmp_file3[32], file_name_isp_script[NUM_STORAGE][32], cmd[2048];
 	u32 tmp_u32, isp_script_size[NUM_STORAGE], file_offset_isp_script[NUM_STORAGE];
 	u32 offset_of_last_file;
 	u32 next_partition_start_address;
@@ -1047,6 +1068,10 @@ int pack_image(int argc, char **argv)
 			} else {
 				printf("Error for '%s': %s: %d\n", argv[i], __FILE__, __LINE__);
 				exit(-1);
+			}
+			if (isp_info.full_file_name_fip0[0] != 0) {
+				truncate(isp_info.full_file_name_fip0, FILE_SIZE_IMAGE_FIP0);
+				offset_of_last_file += FILE_SIZE_IMAGE_FIP0;
 			}
 		} else if ((i >= ARGC_PACK_IMAGE_XBOOT1_FILE) && (i <= idx_last_info_of_binary_partition)) {
 			if (strlen(argv[i]) > SIZE_FULL_FILE_NAME) {
@@ -1270,7 +1295,9 @@ int pack_image(int argc, char **argv)
 
 	fprintf(fd, "echo Load ISP main script and run it ...\n");
 	fprintf(fd, "if test \"$isp_main_storage\" = nand ; then\n");
+
 	fprintf(fd, "    fatload $isp_if $isp_dev $isp_ram_addr /%s 0x%x 0x%x\n", basename(isp_info.file_name_pack_image), isp_script_size[IDX_NAND], file_offset_isp_script[IDX_NAND]);
+
 	fprintf(fd, "elif test \"$isp_main_storage\" = emmc ; then\n");
 #ifdef SUPPORT_MAIN_STORAGE_IS_EMMC
 	fprintf(fd, "    fatload $isp_if $isp_dev $isp_ram_addr /%s 0x%x 0x%x\n", basename(isp_info.file_name_pack_image), isp_script_size[IDX_EMMC], file_offset_isp_script[IDX_EMMC]);
@@ -1281,6 +1308,7 @@ int pack_image(int argc, char **argv)
 
 	fprintf(fd, "else\n");
 	fprintf(fd, "    setenv isp_main_storage nand\n");  // for U-Boot backward compatible, default to nand
+
 	fprintf(fd, "    fatload $isp_if $isp_dev $isp_ram_addr /%s 0x%x 0x%x\n", basename(isp_info.file_name_pack_image), isp_script_size[IDX_NAND], file_offset_isp_script[IDX_NAND]);
 	fprintf(fd, "fi\n");
 	fprintf(fd, "source $isp_ram_addr\n");
@@ -1330,7 +1358,8 @@ int pack_image(int argc, char **argv)
 	}
 	fclose(fd);
 
-	sprintf(cmd, "cat %s %s %s %s > %s", isp_info.full_file_name_xboot0, isp_info.full_file_name_uboot0, tmp_file2, tmp_file, isp_info.file_name_pack_image);
+	sprintf(cmd, "cat %s %s %s %s %s > %s", isp_info.full_file_name_xboot0, isp_info.full_file_name_uboot0, isp_info.full_file_name_fip0, tmp_file2, tmp_file, isp_info.file_name_pack_image);
+
 	// printf("%s\n", cmd);
 	system(cmd);
 
@@ -2454,6 +2483,22 @@ int main(int argc, char **argv)
 
 	// Initialize global data.
 	memset(&isp_info, 0, sizeof(isp_info));
+
+	const char *value = getenv("FIP0");
+    if (value != NULL && strcmp(value, "0") != 0) {
+		isp_info.secure = 1;
+		strcpy(isp_info.full_file_name_fip0, value);
+		printf("create fip0=%s\n", isp_info.full_file_name_fip0);
+
+		value = getenv("PUBKEY");
+		if (value) strcpy(isp_info.pubkey, value);
+		value = getenv("PRIKEY");
+		if (value) strcpy(isp_info.prikey, value);
+
+		printf("pubkey=%s\n", isp_info.pubkey);
+		printf("prikey=%s\n", isp_info.prikey);
+	}
+
 	strncpy(isp_info.file_header.signature, file_header_signature, sizeof(isp_info.file_header.signature));
 
 	if (strcmp(sub_cmd, "pack_image") == 0) {
