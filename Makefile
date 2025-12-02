@@ -481,7 +481,7 @@ secure:
 		cd $(TOPDIR) ; $(TOPDIR)/build/tools/add_uhdr.sh fip_image $(TOPDIR)/$(FIP_PATH)/build/fip.bin $(TOPDIR)/$(FIP_PATH)/build/$(FIP_BIN) $(ARCH) ;\
 	elif [ "$(SECURE_PATH)" = "kernel" ]; then \
 		$(ECHO) $(COLOR_YELLOW) "###kernel add sign data ####!!!" $(COLOR_ORIGIN);\
-		if [ ! -f $(LINUX_PATH)/arch/$(ARCH)/boot/Image ]; then \
+		if [ ! -f $(LINUX_PATH)/arch/$(ARCH)/boot/Image.gz ]; then \
 				exit 1; \
 		fi; \
 		[ "$(SECURE)" = "1" ] && make -C $(TOPDIR)/build/tools/secure_sp7350 sign IMG=$(TOPDIR)/$(LINUX_PATH)/arch/$(ARCH)/boot/Image.gz; \
